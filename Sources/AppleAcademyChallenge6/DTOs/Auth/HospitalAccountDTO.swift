@@ -27,8 +27,8 @@ struct HospitalAccountRequestDTO: Content {
 struct HospitalAccountResponseDTO: Content {
     /// 생성된 계정의 고유 식별자
     let hospitalId: String
-    /// (데모/프로토타입 전용) 응답에 포함된 비밀번호. 운영 환경에서는 제거 권장
-    let hospitalPwd: String
     /// 등록된 병원(기관) 이름
     let hospitalName: String
+    /// 생성 날짜 입력
+    let createdAt: String
 }
