@@ -9,18 +9,18 @@ import Vapor
 import Fluent
 
 final class Report: Model, Content, @unchecked Sendable {
-    static let schema: String = "report"
+    static let schema: String = SchemaValue.report
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "report_contents")
+    @Field(key: ReportField.reportContents)
     var contents: String
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
     @Children(for: \.$report)
