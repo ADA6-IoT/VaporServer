@@ -9,15 +9,15 @@ import Vapor
 import Fluent
 
 final class Image: Model, Content, @unchecked Sendable {
-    static let schema: String = "image"
+    static let schema: String = SchemaValue.image
     
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "image_url")
+    @Field(key: ImageField.imageUrl)
     var imageUrl: String
     
-    @Field(key: "image_type")
+    @Field(key: ImageField.image_type)
     var imageType: TargetType
     
     @Children(for: \.$image)

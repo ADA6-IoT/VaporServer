@@ -9,18 +9,18 @@ import Vapor
 import Fluent
 
 final class Ward: Model, Content, @unchecked Sendable {
-    static let schema: String = "ward"
+    static let schema: String = SchemaValue.ward
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "ward_number")
+    @Field(key: WardField.wardNumber)
     var wardNumber: Int
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
     @Children(for: \.$ward)

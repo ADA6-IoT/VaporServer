@@ -9,24 +9,24 @@ import Vapor
 import Fluent
 
 final class HospitalAccount: Model, Content, @unchecked Sendable {
-    static let schema: String = "hospital_account"
+    static let schema: String = SchemaValue.hospitalAccount
 
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "hospital_login_id")
+    @Field(key: HospitalAccountField.loginId)
     var hospitalLoginId: String
     
-    @Field(key: "hospital_password")
+    @Field(key: HospitalAccountField.pwd)
     var hospitalPassword: String
     
-    @Field(key: "hospital_name")
+    @Field(key: HospitalAccountField.hospitalName)
     var hospitalName: String
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: CommonField.updated_at, on: .update)
     var updatedAt: Date?
     
     @Children(for: \.$hospital)

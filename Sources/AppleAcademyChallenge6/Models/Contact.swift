@@ -9,21 +9,21 @@ import Vapor
 import Fluent
 
 final class Contact: Model, Content, @unchecked Sendable {
-    static let schema: String = "contact"
+    static let schema: String = SchemaValue.contact
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "contact_contents")
+    @Field(key: ContactField.contactContents)
     var content: String
     
-    @Field(key: "ask_email")
+    @Field(key: ContactField.askEmail)
     var askEmail: String
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
     @Children(for: \.$contact)

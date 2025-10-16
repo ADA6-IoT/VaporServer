@@ -9,33 +9,33 @@ import Vapor
 import Fluent
 
 final class Device: Model, Content, @unchecked Sendable {
-    static let schema: String = "device"
+    static let schema: String = SchemaValue.device
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "device_name")
+    @Field(key: DeviceField.deviceName)
     var name: String
     
-    @Field(key: "battery_level")
+    @Field(key: DeviceField.batteryLevel)
     var batteryLevel: Int
     
-    @Field(key: "signal_level")
+    @Field(key: DeviceField.signalLevel)
     var signalLevel: Int
     
-    @Field(key: "malfunction_status")
+    @Field(key: DeviceField.malfunctionStatus)
     var isMalfunctioning: Bool
     
-    @Field(key: "is_assigned")
+    @Field(key: DeviceField.isAssigned)
     var isAssigned: Bool
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: CommonField.updated_at, on: .update)
     var updatedAt: Date?
     
     @Children(for: \.$device)
