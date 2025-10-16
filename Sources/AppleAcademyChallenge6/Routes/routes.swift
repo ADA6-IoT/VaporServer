@@ -5,4 +5,10 @@
 //  Created by Apple Coding machine on 10/13/25.
 //
 
-import Foundation
+import Vapor
+
+func routes(_ app: Application) throws {
+    app.get("ping") { req async in
+        return "pong"
+    }
+}
