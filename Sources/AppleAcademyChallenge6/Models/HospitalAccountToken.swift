@@ -9,27 +9,27 @@ import Vapor
 import Fluent
 
 final class HospitalAccountToken: Model, Content, @unchecked Sendable {
-    static let schema: String = "hospital_account_token"
+    static let schema: String = SchemaValue.hospitalAccountToken
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "access_token")
+    @Field(key: HospitalAccountTokenField.accessToken)
     var accessToken: String
     
-    @Field(key: "refresh_token")
+    @Field(key: HospitalAccountTokenField.refreshToekn)
     var refreshToken: String
     
-    @Field(key: "token_expires_at")
+    @Field(key: HospitalAccountTokenField.tokenExpires)
     var tokenExpiresAt: Date
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: CommonField.updated_at, on: .update)
     var updatedAt: Date?
     
     init() {}

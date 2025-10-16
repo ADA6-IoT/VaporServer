@@ -9,27 +9,27 @@ import Vapor
 import Fluent
 
 final class ImageMapping: Model, Content, @unchecked Sendable {
-    static let schema: String = "image_mapping"
+    static let schema: String = SchemaValue.imageMapping
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "photo_id")
+    @Parent(key: CommonIdField.photoId)
     var image: Image
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @OptionalParent(key: "contact_id")
+    @OptionalParent(key: CommonIdField.contactId)
     var contact: Contact?
     
-    @OptionalParent(key: "report_id")
+    @OptionalParent(key: CommonIdField.reportId)
     var report: Report?
     
-    @Field(key: "target_type")
+    @Field(key: ImageMappingField.targetType)
     var targetType: TargetType
     
-    @Field(key: "target_id")
+    @Field(key: CommonIdField.targetId)
     var targetId: UUID
     
     init() {}
