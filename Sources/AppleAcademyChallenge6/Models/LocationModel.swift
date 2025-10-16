@@ -9,21 +9,21 @@ import Vapor
 import Fluent
 
 final class LocationModel: Model, Content, @unchecked Sendable {
-    static let schema: String = "location"
+    static let schema: String = SchemaValue.location
     
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "latitude")
+    @Field(key: LocationField.latitude)
     var latitude: Double
     
-    @Field(key: "longitude")
+    @Field(key: LocationField.longitude)
     var longitude: Double
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: CommonField.updated_at, on: .update)
     var updatedAt: Date?
     
-    @Parent(key: "patients_id")
+    @Parent(key: CommonIdField.patientsId)
     var patient: Patient
     
     init() {}

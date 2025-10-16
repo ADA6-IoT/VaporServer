@@ -9,36 +9,36 @@ import Vapor
 import Fluent
 
 final class Patient: Model, Content, @unchecked Sendable {
-    static let schema: String = "patients"
+    static let schema: String = SchemaValue.patients
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "hospital_id")
+    @Parent(key: CommonIdField.hospitalId)
     var hospital: HospitalAccount
     
-    @Field(key: "patients_name")
+    @Field(key: PatientField.patientName)
     var name: String
     
-    @Field(key: "patients_etc")
+    @Field(key: PatientField.patientEtc)
     var etc: String
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: CommonField.created_at, on: .create)
     var createdAt: Date?
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: CommonField.updated_at, on: .update)
     var updatedAt: Date?
     
-    @OptionalParent(key: "serial_number")
+    @OptionalParent(key: PatientField.serialNumber)
     var device: Device?
     
-    @OptionalParent(key: "ward_id")
+    @OptionalParent(key: CommonIdField.wardId)
     var ward: Ward?
     
-    @OptionalParent(key: "bed_id")
+    @OptionalParent(key: CommonIdField.bedId)
     var bed: Bed?
     
-    @OptionalParent(key: "department_id")
+    @OptionalParent(key: CommonIdField.departmentId)
     var department: Department?
     
     init() {}
