@@ -34,8 +34,6 @@ final class DIContainer: DIContainerProtocol, @unchecked Sendable {
     func registerSingleton<T>(_ type: T.Type, factory: @escaping () -> T) {
         let key = String(describing: type)
         factories[key] = factory
-        
-        // 싱글톤은 나중에 첫 resolve 시점에 생성
     }
     
     /// 이미 생성된 인스턴스를 싱글톤으로 등록
