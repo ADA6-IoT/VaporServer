@@ -39,3 +39,7 @@ enum EnvironmentValue {
     static let password: String = "DATABASE_PASSWORD"
     static let databaseName: String = "DATABASE_NAME"
 }
+
+private func setupDependencies(app: Application) {
+    let container = DIContainer.shared
+}
