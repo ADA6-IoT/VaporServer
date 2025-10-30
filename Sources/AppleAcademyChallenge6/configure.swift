@@ -8,8 +8,9 @@
 import Vapor
 import Fluent
 import FluentPostgresDriver
+import JWT
 
-public func configure(_ app: Application) throws {
+public func configure(_ app: Application) async throws {
     let hostname = Environment.get(EnvironmentValue.host) ?? "localhost"
     let port = Environment.get(EnvironmentValue.port).flatMap(Int.init(_:)) ?? 5432
     let username = Environment.get(EnvironmentValue.username) ?? "postgres"
@@ -27,8 +28,19 @@ public func configure(_ app: Application) throws {
     
     app.databases.use(.postgres(configuration: configuration), as: .psql)
     
+    guard let jwtSecret = Environment.get(EnvironmentValue.jwtSecret) else {
+        fatalError("JWT_SECRET 존재하지 않아요")
+    }
+    
+    guard let secretData = jwtSecret.data(using: .utf8) else {
+        fatalError("JWT_SECRET 작동하지 않아요")
+    }
+    
+    let hmacKey = HMACKey(from: secretData)
+    await app.jwt.keys.add(hmac: hmacKey, digestAlgorithm: .sha256)
+    
     try routes(app)
-    try app.autoMigrate().wait()
+    try await app.autoMigrate()
 }
 
 enum EnvironmentValue {
@@ -37,4 +49,5 @@ enum EnvironmentValue {
     static let username: String = "DATABASE_USERNAME"
     static let password: String = "DATABASE_PASSWORD"
     static let databaseName: String = "DATABASE_NAME"
+    static let jwtSecret: String = "JWT_SECRET"
 }

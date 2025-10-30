@@ -9,7 +9,7 @@ import Vapor
 
 struct DeviceUpdateRequest: Content {
     let serialNumber: String?
-    let isMalfunctioning: String
+    let isMalfunctioning: Bool
     
     enum CodingKeys: String, CodingKey {
         case serialNumber = "serial_number"

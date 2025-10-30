@@ -25,7 +25,7 @@ struct HospitalDTO: Content {
     init(from hospital: HospitalAccount) {
         self.id = hospital.id!
         self.email = hospital.email
-        self.name = hospital.name
+        self.name = hospital.hospitalName
         self.businessNumber = hospital.businessNumber
         self.createdAt = hospital.createdAt
         self.updatedAt = hospital.updatedAt

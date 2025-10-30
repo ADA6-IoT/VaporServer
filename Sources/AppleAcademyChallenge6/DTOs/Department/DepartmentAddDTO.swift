@@ -11,6 +11,6 @@ import Vapor
 struct DepartmentAddRequest: Content {
     let name: String
     let code: String
-    let decription: String?
+    let description: String?
 }
 

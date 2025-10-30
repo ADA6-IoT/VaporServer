@@ -7,7 +7,7 @@
 
 import Vapor
 
-struct DeviceAddDTO: Content {
+struct DeviceAddRequest: Content {
     let serialNumber: String
     
     enum CodingKeys: String, CodingKey {

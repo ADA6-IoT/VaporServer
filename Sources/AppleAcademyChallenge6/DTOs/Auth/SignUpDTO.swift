@@ -21,7 +21,7 @@ struct SignUpRequest: Content {
     }
 }
 
-struct SignupResponseDTO: Content {
+struct SignUpResponseDTO: Content {
     let accessToken: String
     let expiresAt: Date
     let expiresIn: Int           
