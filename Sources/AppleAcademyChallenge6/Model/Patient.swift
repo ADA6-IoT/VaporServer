@@ -22,7 +22,7 @@ final class Patient: Model, Content, @unchecked Sendable {
     var name: String
     
     @Field(key: "ward")
-    var ward: Int
+    var ward: String
     
     @Field(key: "bed")
     var bed: Int
@@ -48,7 +48,7 @@ final class Patient: Model, Content, @unchecked Sendable {
         id: UUID? = nil,
         hospitalId: UUID,
         name: String,
-        ward: Int,
+        ward: String,
         bed: Int,
         departmentId: UUID,
         deviceId: UUID? = nil,

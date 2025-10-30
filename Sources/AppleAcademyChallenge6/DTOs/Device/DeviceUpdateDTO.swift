@@ -7,10 +7,12 @@
 
 import Vapor
 
-struct ReportMalfunctionRequest: Content {
-    let serialNumber: [String]
+struct DeviceUpdateRequest: Content {
+    let serialNumber: String?
+    let isMalfunctioning: String
     
     enum CodingKeys: String, CodingKey {
         case serialNumber = "serial_number"
+        case isMalfunctioning
     }
 }

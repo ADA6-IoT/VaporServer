@@ -7,15 +7,16 @@
 
 import Vapor
 
-/// 토큰 갱신 시 반환되는 응답 데이터 형식
-struct ReissueResponse: Content {
+// MARK:  - Response
+
+struct TokenResponseDTO: Content {
     let accessToken: String
-    let refreshToken: String
-    let expiresAt: String
+    let expiresAt: Date
+    let expiresIn: Int
     
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
-        case refreshToken = "refresh_token"
         case expiresAt = "expires_at"
+        case expiresIn = "expires_in"
     }
 }

@@ -7,10 +7,40 @@
 
 import Vapor
 
-/// 앱 문의(리포트) 생성 요청 페이로드
-/// 클라이언트가 서버로 전송하는 본문 형식입니다.
-/// - Note: Vapor `Content`를 채택하여 JSON 및 multipart/form-data 바인딩을 지원합니다.
-struct ReportRequest: Content {
-    let contents: String
-    let images: [Data]?
+// MARK: - Response
+struct ReportDTO: Content {
+    let id: UUID
+    let type: String
+    let content: String
+    let email: String?
+    let status: String
+    let images: [String]
+    let adminReply: String?
+    let repliedBy: String?
+    let repliedAt: Date?
+    let createdAt: Date?
+    let updatedAt: Date?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, type, content, email, status, images
+        case adminReply = "admin_reply"
+        case repliedBy = "replied_by"
+        case repliedAt = "replied_at"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+    
+    init(from report: Report) {
+        self.id = report.id!
+        self.type = report.type.rawValue
+        self.content = report.content
+        self.email = report.email
+        self.status = report.status.rawValue
+        self.images = report.images.map { $0.url }
+        self.adminReply = report.adminReply
+        self.repliedBy = report.repliedBy
+        self.repliedAt = report.repliedAt
+        self.createdAt = report.createdAt
+        self.updatedAt = report.updatedAt
+    }
 }

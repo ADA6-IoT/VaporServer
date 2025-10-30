@@ -7,28 +7,30 @@
 
 import Vapor
 
+// MARK: - Reuquest
+
 struct SignUpRequest: Content {
-    let hospitalId: String
-    let hospitalPwd: String
-    let hospitalName: String
+    let email: String
+    let password: String
+    let name: String
+    let businessNumber: String?
     
     enum CodingKeys: String, CodingKey {
-        case hospitalId = "hospital_id"
-        case hospitalPwd = "hospital_pwd"
-        case hospitalName = "hospital_name"
+        case email, password, name
+        case businessNumber = "business_number"
     }
 }
 
-struct SignUpResponse: Content {
-    let id: UUID
-    let hospitalId: String
-    let hospitalName: String
-    let createAt: String
+struct SignupResponseDTO: Content {
+    let accessToken: String
+    let expiresAt: Date
+    let expiresIn: Int           
+    let hospital: HospitalDTO
     
     enum CodingKeys: String, CodingKey {
-        case id
-        case hospitalId = "hospital_id"
-        case hospitalName = "hospital_name"
-        case createAt = "created_at"
+        case accessToken = "access_token"
+        case expiresAt = "expires_at"
+        case expiresIn = "expires_in"
+        case hospital
     }
 }

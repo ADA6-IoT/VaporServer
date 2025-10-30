@@ -39,7 +39,7 @@ final class Device: Model, Content, @unchecked Sendable {
     @OptionalField(key: "location_x")
     var locationX: Double?
     
-    @OptionalField(key: "locatoin_y")
+    @OptionalField(key: "location_y")
     var locationY: Double?
     
     @Timestamp(key: "last_location_update", on: .none)
@@ -58,13 +58,13 @@ final class Device: Model, Content, @unchecked Sendable {
     
     init(
         id: UUID? = nil,
-        hospitald: UUID,
+        hospitalId: UUID,
         serialNumber: String,
         batteryLevel: Int = 100,
         isMalfunctioning: Bool = false
     ) {
         self.id = id
-        self.$hospital.id = hospitald
+        self.$hospital.id = hospitalId
         self.serialNumber = serialNumber
         self.batteryLevel = batteryLevel
         self.isMalfunctioning = isMalfunctioning

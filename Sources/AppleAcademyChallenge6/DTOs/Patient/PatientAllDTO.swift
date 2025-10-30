@@ -12,13 +12,3 @@ struct PatientAllQuery: Content {
     let floor: Int?
     let ward: Int?
 }
-
-struct PatientAllResponse: Content {
-    let totalCount: Int
-    let patients: [PatientDTO]
-    
-    enum CodingKeys: String, CodingKey {
-        case totalCount = "total_count"
-        case patients
-    }
-}

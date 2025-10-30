@@ -7,11 +7,8 @@
 
 import Vapor
 
-struct DepartmentPutPath: Content {
-    let id: UUID
-}
-
-struct DepartmentPutRequest: Content {
+/// 진료과 수정 DTO
+struct DepartmentUpdateRequest: Content {
     let name: String?
     let code: String?
     let description: String?

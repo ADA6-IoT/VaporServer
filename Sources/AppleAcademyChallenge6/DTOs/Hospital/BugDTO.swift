@@ -7,12 +7,11 @@
 
 import Vapor
 
-struct InquiryRequest: Content {
+struct BugReportRequest: Content {
     let content: String
-    let email: String
     let images: [String]?
     
     enum CodingKeys: String, CodingKey {
-        case content, email, images
+        case content, images
     }
 }

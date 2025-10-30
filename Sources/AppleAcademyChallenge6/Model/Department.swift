@@ -25,7 +25,7 @@ final class Department: Model, Content, @unchecked Sendable {
     @Field(key: "code")
     var code: String
     
-    @OptionalField(key: "descripion")
+    @OptionalField(key: "description")
     var description: String?
     
     @Timestamp(key: "created_at", on: .create)

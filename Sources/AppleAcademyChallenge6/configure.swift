@@ -26,7 +26,6 @@ public func configure(_ app: Application) throws {
     )
     
     app.databases.use(.postgres(configuration: configuration), as: .psql)
-    MigrationRepository.register(on: app)
     
     try routes(app)
     try app.autoMigrate().wait()
@@ -38,8 +37,4 @@ enum EnvironmentValue {
     static let username: String = "DATABASE_USERNAME"
     static let password: String = "DATABASE_PASSWORD"
     static let databaseName: String = "DATABASE_NAME"
-}
-
-private func setupDependencies(app: Application) {
-    let container = DIContainer.shared
 }
