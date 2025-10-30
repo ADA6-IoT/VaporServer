@@ -11,11 +11,12 @@ import FluentPostgresDriver
 import JWT
 
 public func configure(_ app: Application) async throws {
+    // MARK: - DATABASE
     let hostname = Environment.get(EnvironmentValue.host) ?? "localhost"
     let port = Environment.get(EnvironmentValue.port).flatMap(Int.init(_:)) ?? 5432
     let username = Environment.get(EnvironmentValue.username) ?? "postgres"
     let password = Environment.get(EnvironmentValue.password) ?? "password"
-    let databaseName = Environment.get(EnvironmentValue.databaseName) ?? "hospital_db"
+    let databaseName = Environment.get(EnvironmentValue.databaseName) ?? "FindU_db"
     
     let configuration = SQLPostgresConfiguration(
         hostname: hostname,
@@ -28,6 +29,7 @@ public func configure(_ app: Application) async throws {
     
     app.databases.use(.postgres(configuration: configuration), as: .psql)
     
+    // MARK: - JWT
     guard let jwtSecret = Environment.get(EnvironmentValue.jwtSecret) else {
         fatalError("JWT_SECRET 존재하지 않아요")
     }
