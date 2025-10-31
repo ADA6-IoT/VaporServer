@@ -18,14 +18,15 @@ enum HospitalAccountField {
     static let email: FieldKey = "email"
     static let password: FieldKey = "password_hash"
     static let name: FieldKey = "hospital_name"
+    static let businessNumber: FieldKey = "business_number"
 }
 
 enum TokenField {
-    static let accessToken: FieldKey = "token"
+    static let token: FieldKey = "token"
 }
 
 enum DepartmentField {
-    static let deviceName: FieldKey = "name"
+    static let departmentName: FieldKey = "name"
     static let code: FieldKey = "code"
     static let description: FieldKey = "description"
 }

@@ -11,11 +11,11 @@ struct CreateRefreshToken: AsyncMigration {
     func prepare(on database: any Database) async throws {
         try await database.schema(SchemaValue.refreshToken)
             .id()
-            .field(TokenField.accessToken, .string, .required)
+            .field(TokenField.token, .string, .required)
             .field(IdKeyField.hospitalId, .uuid, .required, .references(SchemaValue.hospitalAccount, "id", onDelete: .cascade))
             .field(CommonField.expiresAt, .datetime, .required)
             .field(CommonField.createdAt, .datetime)
-            .unique(on: TokenField.accessToken)
+            .unique(on: TokenField.token)
             .create()
     }
     

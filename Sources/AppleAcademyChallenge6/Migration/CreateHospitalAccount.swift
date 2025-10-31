@@ -14,6 +14,7 @@ struct CreateHospitalAccount: AsyncMigration {
             .field(HospitalAccountField.email, .string, .required)
             .field(HospitalAccountField.password, .string, .required)
             .field(HospitalAccountField.name, .string, .required)
+            .field(HospitalAccountField.businessNumber, .string)
             .field(CommonField.createdAt, .datetime)
             .field(CommonField.updatedAt, .datetime)
             .unique(on: HospitalAccountField.email)

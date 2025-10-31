@@ -11,11 +11,15 @@ import Fluent
 struct MigrationConfiguration {
     static func configure(_ app: Application) {
         app.migrations.add(CreateHospitalAccount())
+        
+        app.migrations.add(CreateRefreshToken())
         app.migrations.add(CreateDepartment())
         app.migrations.add(CreateDevice())
-        app.migrations.add(CreatePatient())
         app.migrations.add(CreateAnchor())
         app.migrations.add(CreateReport())
+        
+        app.migrations.add(CreatePatient())
+        
         app.migrations.add(CreateReportImage())
     }
     
