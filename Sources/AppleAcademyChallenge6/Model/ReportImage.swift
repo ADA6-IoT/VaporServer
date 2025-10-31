@@ -9,7 +9,7 @@ import Vapor
 import Fluent
 
 final class ReportImage: Model, Content, @unchecked Sendable {
-    static let schema: String = "report_images"
+    static let schema: String = SchemaValue.reportImages
     
     @ID(key: .id)
     var id: UUID?

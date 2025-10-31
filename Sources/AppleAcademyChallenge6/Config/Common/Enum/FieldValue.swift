@@ -8,73 +8,78 @@
 import Foundation
 import Fluent
 
+enum CommonField {
+    static let createdAt: FieldKey = "created_at"
+    static let updatedAt: FieldKey = "updated_at"
+    static let expiresAt: FieldKey = "expires_at"
+}
+
 enum HospitalAccountField {
-    static let loginId: FieldKey = "hospital_login_id"
-    static let pwd: FieldKey = "hospital_password"
-    static let hospitalName: FieldKey = "hospital_name"
+    static let email: FieldKey = "email"
+    static let password: FieldKey = "password_hash"
+    static let name: FieldKey = "hospital_name"
+    static let businessNumber: FieldKey = "business_number"
 }
 
-enum HospitalAccountTokenField {
-    static let accessToken: FieldKey = "access_token"
-    static let refreshToekn: FieldKey = "refresh_token"
-    static let tokenExpires: FieldKey = "token_expires_at"
-}
-
-enum PatientField {
-    static let patientName: FieldKey = "patients_name"
-    static let patientEtc: FieldKey = "patients_etc"
-    static let serialNumber: FieldKey = "serial_number"
-}
-
-enum BedField {
-    static let bedNumber: FieldKey = "bed_number"
-}
-
-enum ContactField {
-    static let contactContents: FieldKey = "contact_contents"
-    static let askEmail: FieldKey = "ask_email"
+enum TokenField {
+    static let token: FieldKey = "token"
 }
 
 enum DepartmentField {
-    static let departmentName: FieldKey = "department_name"
+    static let departmentName: FieldKey = "name"
+    static let code: FieldKey = "code"
+    static let description: FieldKey = "description"
 }
 
 enum DeviceField {
-    static let deviceName: FieldKey = "device_name"
-    static let batteryLevel: FieldKey = "battery_level"
-    static let signalLevel: FieldKey = "signal_level"
-    static let malfunctionStatus: FieldKey = "malfunction_status"
-    static let isAssigned: FieldKey = "is_assigned"
-}
-
-enum DeviceReportField {
     static let serialNumber: FieldKey = "serial_number"
-    static let reportingContents: FieldKey = "reporting_contents"
+    static let batteryLevel: FieldKey = "battery_level"
+    static let isMalfunctioning: FieldKey = "is_malfunctioning"
+    static let currentZoneType: FieldKey = "current_zone_type"
+    static let currentZoneName: FieldKey = "current_zone_name"
+    static let currentFloor: FieldKey = "current_floor"
+    static let locationX: FieldKey = "location_x"
+    static let locationY: FieldKey = "location_y"
+    static let lastUpdate: FieldKey = "last_location_update"
 }
 
-enum ImageField {
-    static let imageUrl: FieldKey = "image_url"
-    static let image_type: FieldKey = "image_type"
+enum PatientField {
+    static let name: FieldKey = "name"
+    static let ward: FieldKey = "ward"
+    static let bed: FieldKey = "bed"
+    static let memo: FieldKey = "memo"
 }
 
-enum ImageMappingField {
-    static let targetType: FieldKey = "target_type"
-}
-
-enum LocationField {
-    static let latitude: FieldKey = "latitude"
-    static let longitude: FieldKey = "longitude"
-}
-
-enum PatientsField {
-    static let patientName: FieldKey = "patient_name"
-    static let patientEtc: FieldKey = "patient_etc"
+enum AnchorField {
+    static let macAddress: FieldKey = "mac_address"
+    static let zoneName: FieldKey = "zone_name"
+    static let zoneType: FieldKey = "zone_type"
+    static let floor: FieldKey = "floor"
+    static let positionX: FieldKey = "position_x"
+    static let positionY: FieldKey = "position_y"
+    static let positionZ: FieldKey = "position_z"
+    static let isActive: FieldKey = "is_active"
 }
 
 enum ReportField {
-    static let reportContents: FieldKey = "report_contents"
+    static let type: FieldKey = "type"
+    static let content: FieldKey = "content"
+    static let email: FieldKey = "email"
+    static let status: FieldKey = "status"
+    static let adminReply: FieldKey = "admin_reply"
+    static let repliedBy: FieldKey = "replied_by"
+    static let repliedAt: FieldKey = "replied_at"
 }
 
-enum WardField {
-    static let wardNumber: FieldKey = "ward_number"
+enum ReportImageField {
+    static let url: FieldKey = "url"
+    static let filename: FieldKey = "filename"
+    static let uploadedAt: FieldKey = "uploaded_at"
+}
+
+enum IdKeyField {
+    static let hospitalId: FieldKey = "hospital_id"
+    static let departmentId: FieldKey = "department_id"
+    static let deviceId: FieldKey = "device_id"
+    static let reportId: FieldKey = "report_id"
 }

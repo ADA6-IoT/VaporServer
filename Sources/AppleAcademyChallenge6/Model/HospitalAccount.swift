@@ -10,7 +10,7 @@ import Fluent
 
 /// 병원 계정 테이블
 final class HospitalAccount: Model, Content, @unchecked Sendable {
-    static let schema: String = "hospital_accounts"
+    static let schema: String = SchemaValue.hospitalAccount
     
     @ID(key: .id)
     var id: UUID?

@@ -10,7 +10,7 @@ import Fluent
 
 /// 기기 테이블
 final class Device: Model, Content, @unchecked Sendable {
-    static let schema: String = "devices"
+    static let schema: String = SchemaValue.devices
     
     @ID(key: .id)
     var id: UUID?
