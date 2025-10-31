@@ -11,7 +11,7 @@ import Fluent
 
 /// 소속과 테이블
 final class Department: Model, Content, @unchecked Sendable {
-    static let schema: String = "departments"
+    static let schema: String = SchemaValue.departments
     
     @ID(key: .id)
     var id: UUID?

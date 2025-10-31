@@ -10,7 +10,7 @@ import Fluent
 
 /// 앵커 테이블
 final class Anchor: Model, Content, @unchecked Sendable {
-    static let schema: String = "anchors"
+    static let schema: String = SchemaValue.anchors
     
     @ID(key: .id)
     var id: UUID?
