@@ -9,13 +9,26 @@ import Fluent
 
 struct CreateReport: AsyncMigration {
     func prepare(on database: any Database) async throws {
+        
+        let reportTypeEnum = try await database.enum("report_type")
+            .case("inquiry")
+            .case("bug")
+            .create()
+        
+        let reportStatusEnum = try await database.enum("report_status")
+            .case("pending")
+            .case("in_progress")
+            .case("resolved")
+            .case("closed")
+            .create()
+        
         try await database.schema(SchemaValue.reports)
             .id()
             .field(IdKeyField.hospitalId, .uuid, .required, .references(SchemaValue.hospitalAccount, "id", onDelete: .cascade))
-            .field(ReportField.type, .string, .required)
+            .field(ReportField.type, reportTypeEnum, .required)
             .field(ReportField.content, .string, .required)
             .field(ReportField.email, .string)
-            .field(ReportField.status, .string, .required)
+            .field(ReportField.status, reportStatusEnum, .required)
             .field(ReportField.adminReply, .string)
             .field(ReportField.repliedBy, .string)
             .field(ReportField.repliedAt, .datetime)
@@ -26,5 +39,7 @@ struct CreateReport: AsyncMigration {
     
     func revert(on database: any Database) async throws {
         try await database.schema(SchemaValue.reports).delete()
+        try await database.enum("report_status").delete()
+        try await database.enum("report_type").delete()
     }
 }

@@ -7,9 +7,9 @@
 
 import Vapor
 
-enum ReportStatus: String, Content {
-    case pending
-    case inProgress
-    case resolved
-    case closed
+enum ReportStatus: String, Codable {
+    case pending = "pending"
+    case inProgress = "in_progress"
+    case resolved = "resolved"
+    case closed = "closed"
 }

@@ -20,6 +20,7 @@ struct CreatePatient: AsyncMigration {
             .field(PatientField.memo, .string)
             .field(CommonField.createdAt, .datetime)
             .field(CommonField.updatedAt, .datetime)
+            .unique(on: IdKeyField.hospitalId, PatientField.ward, PatientField.bed)
             .create()
     }
     

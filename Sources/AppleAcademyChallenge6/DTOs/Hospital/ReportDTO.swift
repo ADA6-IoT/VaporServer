@@ -10,10 +10,10 @@ import Vapor
 // MARK: - Response
 struct ReportDTO: Content {
     let id: UUID
-    let type: String
+    let type: ReportType
     let content: String
     let email: String?
-    let status: String
+    let status: ReportStatus
     let images: [String]
     let adminReply: String?
     let repliedBy: String?
@@ -32,10 +32,10 @@ struct ReportDTO: Content {
     
     init(from report: Report) {
         self.id = report.id!
-        self.type = report.type.rawValue
+        self.type = report.type
         self.content = report.content
         self.email = report.email
-        self.status = report.status.rawValue
+        self.status = report.status
         self.images = report.images.map { $0.url }
         self.adminReply = report.adminReply
         self.repliedBy = report.repliedBy

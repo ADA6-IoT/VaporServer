@@ -7,7 +7,7 @@
 
 import Vapor
 
-enum ReportType: String, Content {
-    case inquiry
-    case report
+enum ReportType: String, Codable, Content {
+    case inquiry = "inquiry"
+    case bug = "bug"
 }
