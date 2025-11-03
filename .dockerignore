@@ -1,2 +1,13 @@
-.build/
-.swiftpm/
+.build
+.swiftpm
+*.xcodeproj
+*.xcworkspace
+xcuserdata
+.DS_Store
+.git
+.gitignore
+README.md
+.env
+.env.local
+Dockerfile
+docker-compose.yml

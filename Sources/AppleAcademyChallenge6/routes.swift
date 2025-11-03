@@ -7,7 +7,7 @@
 
 import Vapor
 
-func routes(_ app: Application) throws {1
+func routes(_ app: Application) throws {
     app.get("ping") { req async in
         return "pong"
     }

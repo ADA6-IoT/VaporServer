@@ -13,7 +13,7 @@ enum Entrypoint {
         
         
         do {
-            try configure(app)
+            try await configure(app)
             try await app.execute()
         } catch {
             app.logger.report(error: error)
