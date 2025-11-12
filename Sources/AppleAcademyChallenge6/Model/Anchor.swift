@@ -21,11 +21,11 @@ final class Anchor: Model, Content, @unchecked Sendable {
     @Field(key: "mac_address")
     var macAddress: String
     
-    @Field(key: "zone_name")
-    var zoneName: String
-    
     @Field(key: "zone_type")
     var zoneType: String
+    
+    @Field(key: "zone_name")
+    var zoneName: String
     
     @Field(key: "floor")
     var floor: Int
@@ -54,8 +54,8 @@ final class Anchor: Model, Content, @unchecked Sendable {
         id: UUID? = nil,
         hospitalId: UUID,
         macAddress: String,
-        zoneName: String,
         zoneType: String,
+        zoneName: String,
         floor: Int,
         positionX: Double,
         positionY: Double,
@@ -65,8 +65,8 @@ final class Anchor: Model, Content, @unchecked Sendable {
         self.id = id
         self.$hospital.id = hospitalId
         self.macAddress = macAddress
-        self.zoneName = zoneName
         self.zoneType = zoneType
+        self.zoneName = zoneName
         self.floor = floor
         self.positionX = positionX
         self.positionY = positionY

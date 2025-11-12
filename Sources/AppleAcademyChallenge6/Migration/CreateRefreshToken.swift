@@ -16,7 +16,7 @@ struct CreateRefreshToken: AsyncMigration {
             .field(IdKeyField.hospitalId, .uuid, .required, .references(SchemaValue.hospitalAccount, "id", onDelete: .cascade))
             .field(CommonField.expiresAt, .datetime, .required)
             .field(CommonField.createdAt, .datetime)
-            .unique(on: TokenField.token)
+            .unique(on: TokenField.refreshToken)
             .create()
     }
     
