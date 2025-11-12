@@ -17,6 +17,7 @@ struct MigrationConfiguration {
         app.migrations.add(CreateDevice())
         app.migrations.add(CreateAnchor())
         app.migrations.add(CreateReport())
+        app.migrations.add(CreateRoom())
         
         app.migrations.add(CreatePatient())
         

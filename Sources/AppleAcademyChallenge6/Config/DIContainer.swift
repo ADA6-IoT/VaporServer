@@ -5,82 +5,50 @@
 //  Created by Apple Coding machine on 10/17/25.
 //
 
-import Foundation
+// Sources/App/DI/DIContainer.swift
 
-protocol DIContainerProtocol {
-    func register<T>(_ type: T.Type, factory: @escaping () -> T)
-    func resolve<T>(_ type: T.Type) -> T
-}
+import Vapor
+import Fluent
 
-@preconcurrency
-final class DIContainer: DIContainerProtocol, @unchecked Sendable {
-    // MARK: - Singletone
+final class DIContainer: Sendable {
     static let shared = DIContainer()
     
-    // MARK: - Properties
-    private var factories: [String: () -> Any] = [:]
-    private var singletons: [String: Any] = [:]
-    
-    // MARK: - Init
     private init() {}
     
-    /// 의존성 등록(매번 새로운 인스턴스 생성)
-    func register<T>(_ type: T.Type, factory: @escaping () -> T) {
-        let key = String(describing: type)
-        factories[key] = factory
+    // MARK: - Services
+    
+    func makeAuthService(app: Application) -> AuthService {
+        AuthService(database: app.db)
     }
     
-    /// 싱글톤 의존성 등록(한 번만 생성)
-    func registerSingleton<T>(_ type: T.Type, factory: @escaping () -> T) {
-        let key = String(describing: type)
-        factories[key] = factory
+    func makeDepartmentService(app: Application) -> DepartmentService {
+        DepartmentService(database: app.db)
     }
     
-    /// 이미 생성된 인스턴스를 싱글톤으로 등록
-    func registerInstance<T>(_ type: T.Type, instance: T) {
-        let key = String(describing: type)
-        singletons[key] = instance
+    func makePatientService(app: Application) -> PatientService {
+        PatientService(
+            database: app.db,
+            deviceService: makeDeviceService(app: app)
+        )
     }
     
-    
-    func resolve<T>(_ type: T.Type) -> T {
-        let key = String(describing: type)
-        
-        // 이미 생성된 싱글톤이 있는지 확인
-        if let singleton = singletons[key] as? T {
-            return singleton
-        }
-        
-        guard let factory = factories[key] else {
-            fatalError("\(key) 존재하지 않아요")
-        }
-        
-        guard let instance = factory() as? T else {
-            fatalError("Faield to cast \(key)")
-        }
-        
-        if factories[key] != nil && singletons[key] == nil {
-            singletons[key] = instance
-        }
-        
-        return instance
+    func makeDeviceService(app: Application) -> DeviceService {
+        DeviceService(database: app.db)
     }
     
-    func reset() {
-        factories.removeAll()
-        singletons.removeAll()
-    }
-}
-
-@propertyWrapper
-struct Injected<T> {
-    private let container: DIContainer
-    
-    var wrappedValue: T {
-        container.resolve(T.self)
+    func makeAnchorService(app: Application) -> AnchorService {
+        AnchorService(database: app.db)
     }
     
-    init(container: DIContainer = .shared) {
-        self.container = container
+    func makeLocationService(app: Application) -> LocationService {
+        LocationService(
+            database: app.db,
+            deviceService: makeDeviceService(app: app),
+            anchorService: makeAnchorService(app: app)
+        )
+    }
+    
+    func makeReportService(app: Application) -> ReportService {
+        ReportService(database: app.db)
     }
 }

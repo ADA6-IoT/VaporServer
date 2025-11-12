@@ -22,7 +22,8 @@ enum HospitalAccountField {
 }
 
 enum TokenField {
-    static let token: FieldKey = "token"
+    static let accessToken: FieldKey = "access_token"
+    static let refreshToken: FieldKey = "refresh_token"
 }
 
 enum DepartmentField {
@@ -82,4 +83,12 @@ enum IdKeyField {
     static let departmentId: FieldKey = "department_id"
     static let deviceId: FieldKey = "device_id"
     static let reportId: FieldKey = "report_id"
+}
+
+enum RoomField {
+    static let floor: FieldKey = "floor"
+    static let roomNumber: FieldKey = "room_number"
+    static let bedCount: FieldKey = "bed_count"
+    static let roomType: FieldKey = "room_type"
+    static let isAvailable: FieldKey = "is_available"
 }

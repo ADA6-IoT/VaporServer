@@ -14,8 +14,11 @@ final class RefreshToken: Model, Content, @unchecked Sendable {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "token")
-    var token: String
+    @Field(key: "access_token")
+    var accessToken: String
+    
+    @Field(key: "refresh_token")
+    var refreshToken: String
     
     @Parent(key: "hospital_id")
     var hospital: HospitalAccount
@@ -30,12 +33,14 @@ final class RefreshToken: Model, Content, @unchecked Sendable {
     
     init(
         id: UUID? = nil,
-        token: String,
+        accessToken: String,
+        refreshToken: String,
         hospitalId: UUID,
         expiresAt: Date
     ) {
         self.id = id
-        self.token = token
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
         self.$hospital.id = hospitalId
         self.expiresAt = expiresAt
     }
