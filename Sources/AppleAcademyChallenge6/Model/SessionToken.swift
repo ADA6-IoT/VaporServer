@@ -9,23 +9,30 @@ import Vapor
 import Fluent
 import JWT
 
-struct SessionToken: Content, Authenticatable, JWTPayload {
+struct SessionToken: Content, JWTPayload {
+    let hospitalId: UUID
+    let email: String
+    let exp: ExpirationClaim
     
-    var expiration: ExpirationClaim
-    var hospitalId: UUID
+    enum CodingKeys: String, CodingKey {
+        case hospitalId = "hospital_id"
+        case email
+        case exp
+    }
     
-    init(hospital: HospitalAccount) throws {
-        guard let id = hospital.id else {
-            throw Abort(.internalServerError, reason: "병원 계정 존재하지 않음")
-        }
-        
-        self.hospitalId = id
-        
-        let expirationSeconds = Environment.jwtExpriationSeconds
-        self.expiration = ExpirationClaim(value: Date().addingTimeInterval(expirationSeconds))
+    init(
+        hospitalId: UUID,
+        email: String,
+        exp: ExpirationClaim
+    ) {
+        self.hospitalId = hospitalId
+        self.email = email
+        self.exp = exp
     }
     
     func verify(using algorithm: some JWTAlgorithm) async throws {
-        try self.expiration.verifyNotExpired()
+        try exp.verifyNotExpired()
     }
 }
+
+extension SessionToken: Authenticatable {}

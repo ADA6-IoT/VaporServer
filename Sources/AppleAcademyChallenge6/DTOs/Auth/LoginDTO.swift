@@ -9,7 +9,7 @@ import Vapor
 
 // MARK: - Request
 
-struct LoginRequest: Content {
+struct LoginRequestDTO: Content {
     let email: String
     /// 비밀번호(평문으로 전송, 서버에서 bycrypt로 해싱)
     let password: String

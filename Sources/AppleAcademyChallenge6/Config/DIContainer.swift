@@ -18,7 +18,7 @@ final class DIContainer: Sendable {
     // MARK: - Services
     
     func makeAuthService(app: Application) -> AuthService {
-        AuthService(database: app.db)
+        AuthService(database: app.db, app: app)
     }
     
     func makeDepartmentService(app: Application) -> DepartmentService {
