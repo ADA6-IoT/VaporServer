@@ -12,8 +12,8 @@ struct DepartmentController: RouteCollection {
         let department = routes.grouped("api", "department")
         let protected = department.grouped(JWTMiddleware())
         
-        protected.get(use: getAll)
-        protected.post(use: register)
+        protected.get("all", use: getAll)
+        protected.post("regist", use: register)
         protected.patch(":id", use: update)
         protected.delete(":id", use: delete)
     }

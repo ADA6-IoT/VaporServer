@@ -11,6 +11,7 @@ struct ReportController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let reports = routes.grouped("api", "reports")
         let protected = reports.grouped(JWTMiddleware())
+        protected.post("inquiry", use: submitInquiry)
     }
     
     func submitInquiry(_ req: Request) async throws -> CommonResponseDTO<ReportDTO> {

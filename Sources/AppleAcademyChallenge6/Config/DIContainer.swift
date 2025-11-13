@@ -40,10 +40,10 @@ struct DIContainer {
         return DeviceService(database: request.db)
     }
     
-//    /// PatientService 생성
-//    func makePatientService() -> PatientService {
-//        return PatientService(database: request.db)
-//    }
+    //    /// PatientService 생성
+    //    func makePatientService() -> PatientService {
+    //        return PatientService(database: request.db)
+    //    }
     
     /// DepartmentService 생성
     func makeDepartmentService(request: Request) -> DepartmentService {
@@ -58,6 +58,12 @@ struct DIContainer {
     /// ReportService 생성
     func makeReportService(request: Request) -> ReportService {
         return ReportService(database: request.db)
+    }
+    
+    func makeLocationService(request: Request) -> LocationService {
+        let deviceService = makeDeviceService(request: request)
+        let anchorService = makeAnchorService(request: request)
+        return LocationService(database: request.db, deviceService: deviceService, anchorService: anchorService)
     }
     
     func makeS3Service(request: Request) -> S3Service {

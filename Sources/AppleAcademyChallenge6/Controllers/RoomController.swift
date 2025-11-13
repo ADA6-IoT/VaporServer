@@ -14,9 +14,9 @@ struct RoomController: RouteCollection {
         
         let protected = rooms.grouped(JWTMiddleware())
         
-        protected.get(use: list)
+        protected.get("all", use: list)
         protected.get(":id", use: get)
-        protected.post(use: create)
+        protected.post("create", use: create)
         protected.post("bulk", use: bulkCreate)
         protected.patch(":id", use: update)
         protected.delete(":id", use: delete)

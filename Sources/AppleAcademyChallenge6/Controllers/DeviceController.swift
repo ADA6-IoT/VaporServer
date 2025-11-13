@@ -12,8 +12,8 @@ struct DeviceController: RouteCollection {
         let devices = routes.grouped("api", "devices")
         let protected = devices.grouped(JWTMiddleware())
         
-        protected.get(use: getAll)
-        protected.post(use: register)
+        protected.get("all", use: getAll)
+        protected.post("regist", use: register)
         protected.post("malfunction", use: reportMalfunctions)
         protected.post(":serialNumber", use: delete)
     }

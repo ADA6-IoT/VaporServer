@@ -12,6 +12,12 @@ struct AnchorController: RouteCollection {
         let anchors = routes.grouped("api", "anchors")
         let protected = anchors.grouped(JWTMiddleware())
         
+        // TODO: - Path
+        protected.get("all", use: list)
+        protected.get("floor", use: getByFloor)
+        protected.post("create", use: create)
+        protected.patch("update", use: update)
+        protected.delete(use: delete)
     }
     
     func list(_ req: Request) async throws -> CommonResponseDTO<[AnchorDTO]> {
