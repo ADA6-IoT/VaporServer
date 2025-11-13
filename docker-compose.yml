@@ -27,6 +27,9 @@ x-shared_environment: &shared_environment
   DATABASE_PASSWORD: 258100
   JWT_SECRET: production-jwt-secret-key-change-this-min-32-chars-very-secure
   JWT_EXPIRATION_SECONDS: 604800
+  AWS_ACCESS_KEY_ID: "sss"
+  AWS_SECRET_ACCESS_KEY: "ss"
+  AWS_S3_BUCKET: "ss"
 
 services:
   app:
