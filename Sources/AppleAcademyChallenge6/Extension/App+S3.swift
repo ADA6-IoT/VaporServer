@@ -22,5 +22,7 @@ extension Application {
     
     struct S3ServiceKey: StorageKey {
         typealias Value = S3Service
+        
+        static let defaultValue: S3Service? = nil
     }
 }
