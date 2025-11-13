@@ -16,7 +16,7 @@ final class AnchorService: ServiceProtocol {
     }
     
     // MARK: - 앵커 전체 조회
-    func gerAllAnchors(hospitalId: UUID) async throws -> [Anchor] {
+    func getAllAnchors(hospitalId: UUID) async throws -> [Anchor] {
         try await Anchor.query(on: database)
             .filter(\.$hospital.$id == hospitalId)
             .all()
