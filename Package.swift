@@ -16,7 +16,9 @@ let package = Package(
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
-        .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0")
+        .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0"),
+        // 📝 OpenAPI/Swagger 문서 생성
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.9.1")
     ],
     targets: [
         .executableTarget(
@@ -28,7 +30,8 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "JWT", package: "jwt"),
-                .product(name: "SotoS3", package: "soto")
+                .product(name: "SotoS3", package: "soto"),
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings
         ),
