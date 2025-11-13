@@ -7,42 +7,33 @@
 
 import Vapor
 
-struct BulkCreateRoomsRequestDTO: Content {
-    let rooms: [RoomDefinition]
+/// 병실 일괄 생성 요청 DTO
+struct BulkCreateRoomsRequestDTO: Content, Validatable {
     
-    struct RoomDefinition: Content {
-        let floor: Int
-        let roomNumbers: [String]
-        let bedCount: Int
-        
-        enum CodingKeys: String, CodingKey {
-            case floor
-            case roomNumbers = "room_numbers"
-            case bedCount = "bed_count"
-        }
-        
-        func validate() throws {
-            guard floor > 0 else {
-                throw Abort(.badRequest, reason: "0층이 존재할 수 없어요")
-            }
-            
-            guard !roomNumbers.isEmpty else {
-                throw Abort(.badRequest, reason: "방 번호가 비워있습니다.")
-            }
-            
-            guard bedCount > 0 else {
-                throw Abort(.badRequest, reason: "숫자가 잘못되었어요")
-            }
-        }
+    let floor: Int
+    let startRoomNumber: Int
+    let endRoomNumber: Int
+    let bedCount: Int
+    let roomType: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case floor
+        case startRoomNumber = "start_room_number"
+        case endRoomNumber = "end_room_number"
+        case bedCount = "bed_count"
+        case roomType = "room_type"
+    }
+    
+    static func validations(_ validations: inout Validations) {
+        validations.add("floor", as: Int.self, is: .range(1...100))
+        validations.add("start_room_number", as: Int.self, is: .range(1...9999))
+        validations.add("end_room_number", as: Int.self, is: .range(1...9999))
+        validations.add("bed_count", as: Int.self, is: .range(1...10))
     }
     
     func validate() throws {
-            guard !rooms.isEmpty else {
-                throw Abort(.badRequest, reason: "Rooms cannot be empty")
-            }
-            
-            for room in rooms {
-                try room.validate()
-            }
+        if startRoomNumber > endRoomNumber {
+            throw Abort(.badRequest, reason: "시작 병실 번호는 끝 병실 번호보다 작거나 같아야 합니다")
         }
+    }
 }

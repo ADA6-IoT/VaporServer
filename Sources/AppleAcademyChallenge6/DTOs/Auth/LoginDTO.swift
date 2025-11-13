@@ -34,7 +34,7 @@ struct LoginRequestDTO: Content {
             guard password.count >= 8 else {
                 throw Abort(.badRequest, reason: "Password must be at least 8 characters")
             }
-        })
+        }
     }
 }
 
