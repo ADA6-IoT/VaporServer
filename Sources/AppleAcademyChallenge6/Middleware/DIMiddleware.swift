@@ -10,7 +10,7 @@ import Vapor
 
 struct DIMiddleware: AsyncMiddleware {
     func respond(to request: Request, chainingTo next: any AsyncResponder) async throws -> Response {
-        request.storage[DIContainerKey.self] = DIContainer.shared
+        request.storage[DIContainerKey.self] = DIContainer(request: request)
         return try await next.respond(to: request)
     }
 }

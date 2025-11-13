@@ -8,47 +8,55 @@
 // Sources/App/DI/DIContainer.swift
 
 import Vapor
-import Fluent
 
-final class DIContainer: Sendable {
-    static let shared = DIContainer()
+/// Dependency Injection Container
+///
+/// Request 기반으로 Service를 생성합니다.
+struct DIContainer {
     
-    private init() {}
+    let request: Request
+    
+    init(request: Request) {
+        self.request = request
+    }
     
     // MARK: - Services
     
-    func makeAuthService(app: Application) -> AuthService {
-        AuthService(database: app.db, app: app)
-    }
-    
-    func makeDepartmentService(app: Application) -> DepartmentService {
-        DepartmentService(database: app.db)
-    }
-    
-    func makePatientService(app: Application) -> PatientService {
-        PatientService(
-            database: app.db,
-            deviceService: makeDeviceService(app: app)
+    /// AuthService 생성
+    func makeAuthService(request: Request) -> AuthService {
+        return AuthService(
+            database: request.db,
+            app: request.application
         )
     }
     
-    func makeDeviceService(app: Application) -> DeviceService {
-        DeviceService(database: app.db)
+    /// RoomService 생성
+    func makeRoomService(request: Request) -> RoomService {
+        return RoomService(database: request.db)
     }
     
-    func makeAnchorService(app: Application) -> AnchorService {
-        AnchorService(database: app.db)
+    /// DeviceService 생성
+    func makeDeviceService(request: Request) -> DeviceService {
+        return DeviceService(database: request.db)
     }
     
-    func makeLocationService(app: Application) -> LocationService {
-        LocationService(
-            database: app.db,
-            deviceService: makeDeviceService(app: app),
-            anchorService: makeAnchorService(app: app)
-        )
+//    /// PatientService 생성
+//    func makePatientService() -> PatientService {
+//        return PatientService(database: request.db)
+//    }
+    
+    /// DepartmentService 생성
+    func makeDepartmentService(request: Request) -> DepartmentService {
+        return DepartmentService(database: request.db)
     }
     
-    func makeReportService(app: Application) -> ReportService {
-        ReportService(database: app.db)
+    /// AnchorService 생성
+    func makeAnchorService(request: Request) -> AnchorService {
+        return AnchorService(database: request.db)
+    }
+    
+    /// ReportService 생성
+    func makeReportService(request: Request) -> ReportService {
+        return ReportService(database: request.db)
     }
 }

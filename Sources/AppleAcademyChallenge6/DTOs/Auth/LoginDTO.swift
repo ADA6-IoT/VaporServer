@@ -11,8 +11,31 @@ import Vapor
 
 struct LoginRequestDTO: Content {
     let email: String
-    /// 비밀번호(평문으로 전송, 서버에서 bycrypt로 해싱)
     let password: String
+    
+    func validate() throws {
+        guard !email.isEmpty else {
+            throw Abort(.badRequest, reason: "이메일 값 필수")
+        }
+        
+        func validate() throws {
+            guard !email.isEmpty else {
+                throw Abort(.badRequest, reason: "Email is required")
+            }
+            
+            guard email.contains("@") else {
+                throw Abort(.badRequest, reason: "Invalid email format")
+            }
+            
+            guard !password.isEmpty else {
+                throw Abort(.badRequest, reason: "Password is required")
+            }
+            
+            guard password.count >= 8 else {
+                throw Abort(.badRequest, reason: "Password must be at least 8 characters")
+            }
+        })
+    }
 }
 
 // MARK: - Response
