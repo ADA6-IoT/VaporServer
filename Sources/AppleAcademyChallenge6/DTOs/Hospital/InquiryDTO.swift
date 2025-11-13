@@ -11,9 +11,14 @@ struct InquiryRequest: Content {
     let type: ReportType
     let content: String
     let email: String
-    let images: [String]?
+    let images: [ImageUpload]?
     
     enum CodingKeys: String, CodingKey {
         case content, email, images, type
+    }
+    
+    struct ImageUpload: Content {
+        let data: Data
+        let filename: String
     }
 }
