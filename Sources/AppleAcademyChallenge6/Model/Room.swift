@@ -43,7 +43,6 @@ final class Room: Model, Content, @unchecked Sendable {
         floor: Int,
         roomNumber: String,
         bedCount: Int = 1,
-        roomType: String? = nil,
         isAvailable: Bool = true
     ) {
         self.id = id
