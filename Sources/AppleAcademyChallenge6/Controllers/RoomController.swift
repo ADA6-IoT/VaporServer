@@ -261,7 +261,6 @@ struct RoomController: RouteCollection {
         let result = RoomDTO(from: room)
         return CommonResponseDTO.success(code: ResponseCode.COMMON200, message: "병실 수정 성공", result: result)
     }
-    
     // MARK: - Delete
     
     /// 병실 삭제
