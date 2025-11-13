@@ -20,6 +20,7 @@ final class DeviceService: ServiceProtocol {
         try await Device.query(on: database)
             .filter(\.$hospital.$id == hospitalId)
             .with(\.$hospital)
+            .sort(\.$createdAt, .descending)
             .all()
     }
     
@@ -89,12 +90,18 @@ final class DeviceService: ServiceProtocol {
     }
     
     // MARK: - 기기 삭제
-    func deleteDevice(id: UUID, hospitalId: UUID) async throws {
+    func deleteDevice(serialNumber: String, hospitalId: UUID) async throws {
         guard let device = try await Device.query(on: database)
-            .filter(\.$id == id)
+            .filter(\.$serialNumber == serialNumber)
             .filter(\.$hospital.$id == hospitalId)
             .first() else {
             throw Abort(.notFound, reason: "디바이스 찾을 수 없습니다.")
+        }
+        
+        try await device.$patient.load(on: database)
+        
+        if device.patient != nil {
+            throw Abort(.conflict, reason: "환자에게 배정된 기기는 삭제할 수 없습닏")
         }
         
         try await device.delete(on: database)
@@ -104,22 +111,36 @@ final class DeviceService: ServiceProtocol {
     func reportMalfunctions(
         serialNumbers: [String],
         hospitalId: UUID
-    ) async throws -> [Device] {
-        guard !serialNumbers.isEmpty else {
-            throw Abort(.badRequest, reason: "시리얼 번호가 비었습니다.")
+    ) async throws -> BulkMalfunctionResult {
+        
+        var successCount = 0
+        var failedDevices: [String] = []
+        
+        for serialNumber in serialNumbers {
+            do {
+                guard let device = try await Device.query(on: database)
+                    .filter(\.$serialNumber == serialNumber)
+                    .filter(\.$hospital.$id == hospitalId)
+                    .first() else {
+                    failedDevices.append("\(serialNumber) (없음)")
+                    continue
+                }
+                
+                device.isMalfunctioning = true
+                try await device.save(on: database)
+                successCount += 1
+                
+            } catch {
+                failedDevices.append("\(serialNumber) (오류)")
+            }
         }
         
-        let devices = try await Device.query(on: database)
-            .filter(\.$serialNumber ~~ serialNumbers)
-            .filter(\.$hospital.$id == hospitalId)
-            .all()
-        
-        for device in devices {
-            device.isMalfunctioning = true
-            try await device.update(on: database)
-        }
-        
-        return devices
+        return BulkMalfunctionResult(
+            totalCount: serialNumbers.count,
+            successCount: successCount,
+            failedCount: failedDevices.count,
+            failedDevices: failedDevices
+        )
     }
     
 }

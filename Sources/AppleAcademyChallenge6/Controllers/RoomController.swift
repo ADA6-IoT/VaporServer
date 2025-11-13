@@ -13,43 +13,51 @@ struct RoomController: RouteCollection {
         let rooms = routes.grouped("api", "rooms")
         
         let protected = rooms.grouped(JWTMiddleware())
+        
+        protected.get(use: list)
+        protected.get(":id", use: get)
+        protected.post(use: create)
+        protected.post("bulk", use: bulkCreate)
+        protected.patch(":id", use: update)
+        protected.delete(":id", use: delete)
+        protected.delete(use: deleteAll)
     }
     
     // MARK: - List
-       
-       /// 병실 목록 조회
-       ///
-       /// **엔드포인트:** `GET /api/rooms`
-       ///
-       /// **요청 헤더:**
-       /// ```
-       /// Authorization: Bearer {access_token}
-       /// ```
-       ///
-       /// **응답:**
-       /// ```json
-       /// {
-       ///   "is_success": true,
-       ///   "code": "COMMON200",
-       ///   "message": "병실 목록 조회 성공",
-       ///   "result": {
-       ///     "floors": [
-       ///       {
-       ///         "floor": 3,
-       ///         "rooms": [
-       ///           {
-       ///             "id": "...",
-       ///             "floor": 3,
-       ///             "room_number": "301",
-       ///             "bed_count": 4,
-       ///             "room_type": "일반실"
-       ///           }
-       ///         ]
-       ///       }
-       ///     ]
-       ///   }
-       /// }
-       /// ```
+    
+    /// 병실 목록 조회
+    ///
+    /// **엔드포인트:** `GET /api/rooms`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "COMMON200",
+    ///   "message": "병실 목록 조회 성공",
+    ///   "result": {
+    ///     "floors": [
+    ///       {
+    ///         "floor": 3,
+    ///         "rooms": [
+    ///           {
+    ///             "id": "...",
+    ///             "floor": 3,
+    ///             "room_number": "301",
+    ///             "bed_count": 4,
+    ///             "room_type": "일반실"
+    ///           }
+    ///         ]
+    ///       }
+    ///     ]
+    ///   }
+    /// }
+    /// ```
     func list(_ req: Request) async throws -> CommonResponseDTO<RoomsGroupedByFloorDTO> {
         let sessionToken = try req.requireAuth()
         let service = req.di.makeRoomService(request: req)
@@ -60,32 +68,32 @@ struct RoomController: RouteCollection {
     }
     
     // MARK: - Get
-       
-       /// 병실 단건 조회
-       ///
-       /// **엔드포인트:** `GET /api/rooms/:id`
-       ///
-       /// **요청 헤더:**
-       /// ```
-       /// Authorization: Bearer {access_token}
-       /// ```
-       ///
-       /// **응답:**
-       /// ```json
-       /// {
-       ///   "is_success": true,
-       ///   "code": "COMMON200",
-       ///   "message": "병실 조회 성공",
-       ///   "result": {
-       ///     "id": "...",
-       ///     "floor": 3,
-       ///     "room_number": "301",
-       ///     "bed_count": 4,
-       ///     "room_type": "일반실",
-       ///     "created_at": "2025-11-03T10:00:00Z"
-       ///   }
-       /// }
-       /// ```
+    
+    /// 병실 단건 조회
+    ///
+    /// **엔드포인트:** `GET /api/rooms/:id`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "COMMON200",
+    ///   "message": "병실 조회 성공",
+    ///   "result": {
+    ///     "id": "...",
+    ///     "floor": 3,
+    ///     "room_number": "301",
+    ///     "bed_count": 4,
+    ///     "room_type": "일반실",
+    ///     "created_at": "2025-11-03T10:00:00Z"
+    ///   }
+    /// }
+    /// ```
     func get(_ req: Request) async throws -> CommonResponseDTO<RoomDTO> {
         let sessionToken = try req.requireAuth()
         let id = try req.parameters.require("id", as: UUID.self)
@@ -97,41 +105,41 @@ struct RoomController: RouteCollection {
     }
     
     // MARK: - Create
-       
-       /// 병실 생성
-       ///
-       /// **엔드포인트:** `POST /api/rooms`
-       ///
-       /// **요청 헤더:**
-       /// ```
-       /// Authorization: Bearer {access_token}
-       /// ```
-       ///
-       /// **요청 바디:**
-       /// ```json
-       /// {
-       ///   "floor": 3,
-       ///   "room_number": "301",
-       ///   "bed_count": 4,
-       ///   "room_type": "일반실"
-       /// }
-       /// ```
-       ///
-       /// **응답:**
-       /// ```json
-       /// {
-       ///   "is_success": true,
-       ///   "code": "CREATED201",
-       ///   "message": "병실 생성 성공",
-       ///   "result": {
-       ///     "id": "...",
-       ///     "floor": 3,
-       ///     "room_number": "301",
-       ///     "bed_count": 4,
-       ///     "room_type": "일반실"
-       ///   }
-       /// }
-       /// ```
+    
+    /// 병실 생성
+    ///
+    /// **엔드포인트:** `POST /api/rooms`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **요청 바디:**
+    /// ```json
+    /// {
+    ///   "floor": 3,
+    ///   "room_number": "301",
+    ///   "bed_count": 4,
+    ///   "room_type": "일반실"
+    /// }
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "CREATED201",
+    ///   "message": "병실 생성 성공",
+    ///   "result": {
+    ///     "id": "...",
+    ///     "floor": 3,
+    ///     "room_number": "301",
+    ///     "bed_count": 4,
+    ///     "room_type": "일반실"
+    ///   }
+    /// }
+    /// ```
     func create(_ req: Request) async throws -> CommonResponseDTO<RoomDTO> {
         try CreateRoomRequestDTO.validate(content: req)
         let dto = try req.content.decode(CreateRoomRequestDTO.self)
@@ -149,41 +157,41 @@ struct RoomController: RouteCollection {
         return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "병실 생성 성공", result: result)
     }
     // MARK: - Bulk Create
-        
-        /// 병실 일괄 생성
-        ///
-        /// **엔드포인트:** `POST /api/rooms/bulk`
-        ///
-        /// **요청 헤더:**
-        /// ```
-        /// Authorization: Bearer {access_token}
-        /// ```
-        ///
-        /// **요청 바디:**
-        /// ```json
-        /// {
-        ///   "floor": 3,
-        ///   "start_room_number": 301,
-        ///   "end_room_number": 310,
-        ///   "bed_count": 4,
-        ///   "room_type": "일반실"
-        /// }
-        /// ```
-        ///
-        /// **응답:**
-        /// ```json
-        /// {
-        ///   "is_success": true,
-        ///   "code": "CREATED201",
-        ///   "message": "병실 일괄 생성 완료",
-        ///   "result": {
-        ///     "total_count": 10,
-        ///     "success_count": 10,
-        ///     "failed_count": 0,
-        ///     "failed_rooms": []
-        ///   }
-        /// }
-        /// ```
+    
+    /// 병실 일괄 생성
+    ///
+    /// **엔드포인트:** `POST /api/rooms/bulk`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **요청 바디:**
+    /// ```json
+    /// {
+    ///   "floor": 3,
+    ///   "start_room_number": 301,
+    ///   "end_room_number": 310,
+    ///   "bed_count": 4,
+    ///   "room_type": "일반실"
+    /// }
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "CREATED201",
+    ///   "message": "병실 일괄 생성 완료",
+    ///   "result": {
+    ///     "total_count": 10,
+    ///     "success_count": 10,
+    ///     "failed_count": 0,
+    ///     "failed_rooms": []
+    ///   }
+    /// }
+    /// ```
     func bulkCreate(_ req: Request) async throws -> CommonResponseDTO<BulkCreateResult> {
         let dto = try req.content.decode(BulkCreateRoomsRequestDTO.self)
         try dto.validate()
@@ -202,41 +210,41 @@ struct RoomController: RouteCollection {
     }
     
     // MARK: - Update
-        
-        /// 병실 수정
-        ///
-        /// **엔드포인트:** `PATCH /api/rooms/:id`
-        ///
-        /// **요청 헤더:**
-        /// ```
-        /// Authorization: Bearer {access_token}
-        /// ```
-        ///
-        /// **요청 바디:**
-        /// ```json
-        /// {
-        ///   "floor": 4,
-        ///   "room_number": "401",
-        ///   "bed_count": 6,
-        ///   "room_type": "특실"
-        /// }
-        /// ```
-        ///
-        /// **응답:**
-        /// ```json
-        /// {
-        ///   "is_success": true,
-        ///   "code": "COMMON200",
-        ///   "message": "병실 수정 성공",
-        ///   "result": {
-        ///     "id": "...",
-        ///     "floor": 4,
-        ///     "room_number": "401",
-        ///     "bed_count": 6,
-        ///     "room_type": "특실"
-        ///   }
-        /// }
-        /// ```
+    
+    /// 병실 수정
+    ///
+    /// **엔드포인트:** `PATCH /api/rooms/:id`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **요청 바디:**
+    /// ```json
+    /// {
+    ///   "floor": 4,
+    ///   "room_number": "401",
+    ///   "bed_count": 6,
+    ///   "room_type": "특실"
+    /// }
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "COMMON200",
+    ///   "message": "병실 수정 성공",
+    ///   "result": {
+    ///     "id": "...",
+    ///     "floor": 4,
+    ///     "room_number": "401",
+    ///     "bed_count": 6,
+    ///     "room_type": "특실"
+    ///   }
+    /// }
+    /// ```
     func update(_ req: Request) async throws -> CommonResponseDTO<RoomDTO> {
         let dto = try req.content.decode(UpdateRoomRequestDTO.self)
         let sessionToken = try req.requireAuth()
@@ -255,24 +263,24 @@ struct RoomController: RouteCollection {
     }
     
     // MARK: - Delete
-        
-        /// 병실 삭제
-        ///
-        /// **엔드포인트:** `DELETE /api/rooms/:id`
-        ///
-        /// **요청 헤더:**
-        /// ```
-        /// Authorization: Bearer {access_token}
-        /// ```
-        ///
-        /// **응답:**
-        /// ```json
-        /// {
-        ///   "is_success": true,
-        ///   "code": "COMMON200",
-        ///   "message": "병실 삭제 성공"
-        /// }
-        /// ```
+    
+    /// 병실 삭제
+    ///
+    /// **엔드포인트:** `DELETE /api/rooms/:id`
+    ///
+    /// **요청 헤더:**
+    /// ```
+    /// Authorization: Bearer {access_token}
+    /// ```
+    ///
+    /// **응답:**
+    /// ```json
+    /// {
+    ///   "is_success": true,
+    ///   "code": "COMMON200",
+    ///   "message": "병실 삭제 성공"
+    /// }
+    /// ```
     func delete(_ req: Request) async throws -> CommonResponseDTO<EmptyResponse> {
         let sessionToken = try req.requireAuth()
         let id = try req.parameters.require("id", as: UUID.self)
