@@ -37,40 +37,38 @@ COPY . .
 RUN mkdir -p /staging
 
 # Build with detailed error output and limited resources
-RUN set -e && \
+RUN set -eo pipefail && \
     echo "=== Starting Swift build ===" && \
     echo "=== Available memory ===" && \
     free -h && \
     echo "=== Starting build with limited parallelism ===" && \
-    swift build -c release \
+    BUILD_OUTPUT=$(swift build -c release \
         --product AppleAcademyChallenge6 \
         -j 1 \
         --disable-sandbox \
-        -Xswiftc -diagnostic-style=llvm 2>&1 | tee /tmp/build.log || \
-    (echo "=== Build failed. Last 200 lines of output ===" && \
-     tail -200 /tmp/build.log && \
-     exit 1) && \
+        -Xswiftc -diagnostic-style=llvm 2>&1) && \
+    echo "$BUILD_OUTPUT" && \
+    if echo "$BUILD_OUTPUT" | grep -q "error:"; then \
+        echo "=== Build failed with errors ===" && \
+        exit 1; \
+    fi && \
     echo "=== Build completed successfully ==="
 
-# Debug: Show the build directory structure
-RUN echo "=== Build directory structure ===" && \
-    find /build/.build -type d -name "release" 2>/dev/null || echo "No release directory found" && \
-    echo "=== Looking for executable ===" && \
-    find /build/.build -name "AppleAcademyChallenge6" -type f 2>/dev/null || echo "No executable found"
-
 # Get the binary path and copy executable
-RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
+RUN set -e && \
+    BIN_PATH=$(swift build -c release --show-bin-path --product AppleAcademyChallenge6) && \
     echo "Binary path from swift: $BIN_PATH" && \
-    if [ -d "$BIN_PATH" ]; then \
-        ls -la "$BIN_PATH" && \
+    echo "=== Checking for executable ===" && \
+    ls -la "$BIN_PATH/" || true && \
+    if [ -f "$BIN_PATH/AppleAcademyChallenge6" ]; then \
+        echo "Found executable at: $BIN_PATH/AppleAcademyChallenge6" && \
         cp "$BIN_PATH/AppleAcademyChallenge6" /staging/ && \
         chmod +x /staging/AppleAcademyChallenge6; \
     else \
-        echo "Directory does not exist, searching for executable..." && \
-        EXEC_PATH=$(find /build/.build -name "AppleAcademyChallenge6" -type f | head -n 1) && \
-        echo "Found executable at: $EXEC_PATH" && \
-        cp "$EXEC_PATH" /staging/AppleAcademyChallenge6 && \
-        chmod +x /staging/AppleAcademyChallenge6; \
+        echo "ERROR: Executable not found in expected location" && \
+        echo "=== Searching entire build directory ===" && \
+        find /build/.build -name "AppleAcademyChallenge6" -type f && \
+        exit 1; \
     fi
 
 # Copy resources bundled by SPM to staging area
