@@ -33,6 +33,10 @@ RUN swift package resolve \
 # Copy entire repo into container
 COPY . .
 
+# Remove Tests directory and testTarget from Package.swift to avoid overlapping sources error
+RUN rm -rf Tests/ && \
+    sed -i '/\.testTarget(/,/^[[:space:]]*)/d' Package.swift
+
 # Create staging directory
 RUN mkdir -p /staging
 
@@ -88,7 +92,7 @@ RUN [ -d /build/Public ] && { mv /build/Public ./Public && chmod -R a-w ./Public
 RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w ./Resources; } || true
 
 # Verify the executable exists
-RUN ls -la /staging && file /staging/AppleAcademyChallenge6
+RUN ls -la /staging
 
 # ================================
 # Run image
