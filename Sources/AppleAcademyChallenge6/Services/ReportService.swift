@@ -23,7 +23,7 @@ final class ReportService: ServiceProtocol {
         email: String,
         images: [String]
     ) async throws -> Report {
-        let report = Report(hospitalId: hospitalId, type: .inquiry, content: content, email: email, status: .pending)
+        let report = Report(hospitalId: hospitalId, content: content, email: email, status: .pending)
         
         try await report.save(on: database)
         

@@ -7,6 +7,7 @@
 
 import Vapor
 import Fluent
+import VaporToOpenAPI
 
 struct RoomController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
@@ -14,13 +15,103 @@ struct RoomController: RouteCollection {
         
         let protected = rooms.grouped(JWTMiddleware())
         
+        // MARK: - 병실 목록 조회 (층별 그룹화)
         protected.get("all", use: list)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 목록 조회",
+                description: """
+                          병원의 모든 병실을 층별로 그룹화하여 조회합니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                response: .type(CommonResponseDTO<RoomsGroupedByFloorDTO>.self)
+            )
+        
+        // MARK: - 병실 단건 조회
         protected.get(":id", use: get)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 단건 조회",
+                description: """
+                          특정 병실의 상세 정보를 조회합니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                response: .type(CommonResponseDTO<RoomDTO>.self)
+            )
+        
+        // MARK: - 병실 생성
         protected.post("create", use: create)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 생성",
+                description: """
+                          새로운 병실을 생성합니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                body: .type(CreateRoomRequestDTO.self),
+                response: .type(CommonResponseDTO<RoomDTO>.self)
+            )
+        
+        // MARK: - 병실 일괄 생성
         protected.post("bulk", use: bulkCreate)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 일괄 생성",
+                description: """
+                          특정 층의 병실을 번호 범위로 일괄 생성합니다.
+                          
+                          예: 3층 301호~310호 일괄 생성
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                body: .type(BulkCreateRoomsRequestDTO.self),
+                response: .type(CommonResponseDTO<BulkCreateResult>.self)
+            )
+        
+        // MARK: - 병실 수정
         protected.patch(":id", use: update)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 수정",
+                description: """
+                          기존 병실의 정보를 수정합니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                body: .type(UpdateRoomRequestDTO.self),
+                response: .type(CommonResponseDTO<RoomDTO>.self)
+            )
+        
+        // MARK: - 병실 단건 삭제
         protected.delete(":id", use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 삭제",
+                description: """
+                          특정 병실을 삭제합니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
+        
+        // MARK: - 병실 전체 삭제
         protected.delete(use: deleteAll)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.rooms),
+                summary: "병실 전체 삭제",
+                description: """
+                          병원의 모든 병실을 삭제합니다.
+                          
+                          ⚠️ 주의: 이 작업은 되돌릴 수 없습니다.
+                          
+                          **인증 필요:** Bearer Token
+                          """,
+                response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     // MARK: - List

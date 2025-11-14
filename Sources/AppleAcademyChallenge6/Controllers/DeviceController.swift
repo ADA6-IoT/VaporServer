@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import VaporToOpenAPI
 
 struct DeviceController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
@@ -13,9 +14,35 @@ struct DeviceController: RouteCollection {
         let protected = devices.grouped(JWTMiddleware())
         
         protected.get("all", use: getAll)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.device),
+                summary: "디바이스 전체 조회",
+                description: "병원의 모든 디바이스 목록을 조회합니다.",
+                response: .type(CommonResponseDTO<[DeviceDTO]>.self)
+            )
         protected.post("regist", use: register)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.device),
+                summary: "디바이스 등록",
+                description: "새로운 디바이스를 등록합니다. 시리얼 넘버를 사용하여 디바이스 식별",
+                body: .type(DeviceAddRequest.self),
+                response: .type(CommonResponseDTO<DeviceDTO>.self)
+            )
         protected.post("malfunction", use: reportMalfunctions)
-        protected.post(":serialNumber", use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.device),
+                summary: "디바이스 고장 신고",
+                description: "여러 디바이스의 고장을 일괄 신고합니다.",
+                body: .type(ReportMalfunctionRequest.self),
+                response: .type(CommonResponseDTO<BulkMalfunctionResult>.self)
+            )
+        protected.delete(":serialNumber", use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.device),
+                summary: "디바이스 삭제",
+                description: "시리얼 넘버로 디바이스를 삭제합니다.",
+                response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     func getAll(_ req: Request) async throws -> CommonResponseDTO<[DeviceDTO]> {

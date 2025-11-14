@@ -12,6 +12,8 @@ import JWT
 import SotoS3
 
 public func configure(_ app: Application) async throws {
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    
     try DatabaseConfiguration.configure(app)
     try await JWTConfiguration.configure(app)
     MigrationConfiguration.configure(app)
@@ -19,6 +21,19 @@ public func configure(_ app: Application) async throws {
     
     // MARK: - Run
     try routes(app)
+    
+    app.get("openapi") { req -> Response in
+        let openapi = OpenAPIConfiguration.generateOpenAPI(for: req.application)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(openapi)
+        
+        var headers = HTTPHeaders()
+        headers.add(name: .contentType, value: "application/json")
+        return Response(status: .ok, headers: headers, body: .init(data: data))
+    }
+    
+    
     try await MigrationConfiguration.migrate(app)
 }
 

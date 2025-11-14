@@ -8,6 +8,13 @@
 import Vapor
 
 // MARK:  - Response
+struct RefreshRequest: Content {
+    let refreshToken: String
+    
+    enum CodingKeys: String, CodingKey {
+        case refreshToken = "refresh_token"
+    }
+}
 
 struct TokenResponseDTO: Content {
     let accessToken: String

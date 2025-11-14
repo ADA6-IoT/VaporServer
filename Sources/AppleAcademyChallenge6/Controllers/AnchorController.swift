@@ -6,18 +6,51 @@
 //
 
 import Vapor
+import Fluent
+import VaporToOpenAPI
 
 struct AnchorController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let anchors = routes.grouped("api", "anchors")
         let protected = anchors.grouped(JWTMiddleware())
         
-        // TODO: - Path
         protected.get("all", use: list)
-        protected.get("floor", use: getByFloor)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.anchors),
+                summary: "앵커 전체 조회",
+                description: "병원의 모든 앵커 목록을 조회합니다.",
+                response: .type(CommonResponseDTO<[AnchorDTO]>.self)
+            )
+        protected.get("floor", ":floor", use: getByFloor)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.anchors),
+                summary: "층별 앵커 조회",
+                description: "특정 층의 앵커 목록을 조회합니다.",
+                response: .type(CommonResponseDTO<[AnchorDTO]>.self)
+            )
         protected.post("create", use: create)
-        protected.patch("update", use: update)
-        protected.delete(use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.anchors),
+                summary: "앵커 생성",
+                description: "새로운 앵커를 생성합니다.",
+                body: .type(AnchorAddRequest.self),
+                response: .type(CommonResponseDTO<AnchorDTO>.self)
+            )
+        protected.patch("update", ":id", use: update)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.anchors),
+                summary: "앵커 수정",
+                description: "기존 앵커 정보를 수정합니다.",
+                body: .type(AnchorUpdateRequest.self),
+                response: .type(CommonResponseDTO<AnchorDTO>.self)
+            )
+        protected.delete(":id", use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.anchors),
+                summary: "앵커 삭제",
+                description: "앵커를 삭제합니다.",
+                response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     func list(_ req: Request) async throws -> CommonResponseDTO<[AnchorDTO]> {

@@ -12,6 +12,10 @@ func routes(_ app: Application) throws {
         return "pong"
     }
     
+    app.get("docs") { req -> Response in
+        return req.redirect(to: "/swagger-ui.html")
+    }
+    
     try app.register(collection: AuthController())
     try app.register(collection: RoomController())
     try app.register(collection: DepartmentController())
