@@ -11,7 +11,7 @@ extension Environment {
     static var jwtExpriationSeconds: TimeInterval {
         guard let value = Self.get("JWT_EXPIRATION_SECONDS"),
               let seconds = TimeInterval(value) else {
-            return 60 * 60 * 24 * 7  // 기본값: 7일
+            return 60 * 60 * 24 * 7
         }
         return seconds
     }

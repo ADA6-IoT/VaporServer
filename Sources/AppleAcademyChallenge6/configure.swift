@@ -48,4 +48,5 @@ enum EnvironmentValue {
     static let S3Key: String = "AWS_ACCESS_KEY_ID"
     static let S3AccessKey: String = "AWS_SECRET_ACCESS_KEY"
     static let S3Bucket: String = "AWS_S3_BUCKET"
+    static let serverUrl: String = "SERVER_URL"
 }

@@ -52,11 +52,11 @@ struct OpenAPIConfiguration {
         switch environment {
         case .production:
             return [
-                .init(url: "http://localhost:8080", description: "Development")
+                .init(url: EnvironmentValue.serverUrl, description: "Development")
             ]
         case .development:
             return [
-                .init(url: "http://localhost:8080", description: "Development")
+                .init(url: EnvironmentValue.serverUrl, description: "Development")
             ]
         default:
             return [
