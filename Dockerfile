@@ -97,7 +97,7 @@ RUN ls -la /staging
 # ================================
 # Run image
 # ================================
-FROM ubuntu:noble
+FROM swift:6.2-noble-slim
 
 # Make sure all system packages are up to date, and install only essential packages.
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
