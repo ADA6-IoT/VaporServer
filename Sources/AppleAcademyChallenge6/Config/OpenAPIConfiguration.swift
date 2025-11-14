@@ -49,18 +49,21 @@ struct OpenAPIConfiguration {
     private static func createServers(environment: Environment)
     -> [ServerObject]
     {
+        // 환경 변수에서 서버 URL 가져오기, 없으면 기본값 사용
+        let serverUrl = Environment.get(EnvironmentValue.serverUrl) ?? "http://localhost:8080"
+
         switch environment {
         case .production:
             return [
-                .init(url: Environment.get(EnvironmentValue.serverUrl) ?? "http://localhost:8080", description: "Development")
+                .init(url: serverUrl, description: "Production Server")
             ]
         case .development:
             return [
-                .init(url: Environment.get(EnvironmentValue.serverUrl) ?? "http://localhost:8080", description: "Development")
+                .init(url: serverUrl, description: "Development Server")
             ]
         default:
             return [
-                .init(url: "http://localhost:8080", description: "Default")
+                .init(url: serverUrl, description: "Server")
             ]
         }
     }

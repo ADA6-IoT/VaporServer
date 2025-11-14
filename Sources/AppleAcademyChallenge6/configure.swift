@@ -12,9 +12,24 @@ import JWT
 import SotoS3
 
 public func configure(_ app: Application) async throws {
+    // MARK: - Middleware Configuration
+
+    // 1. 에러 처리 미들웨어 (모든 에러를 캐치하고 적절한 응답 반환)
+    app.middleware.use(ErrorMiddleware.default(environment: app.environment))
+
+    // 2. 정적 파일 제공 미들웨어
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
+    // 3. 요청 로깅 미들웨어 (개발/프로덕션 환경에서 요청 로그 출력)
+    app.middleware.use(RouteLoggingMiddleware(logLevel: .info))
+
+    // 4. CORS 설정 미들웨어
     CORSConfiguration.configure(app)
+
+    // 5. DI 컨테이너 미들웨어
+    app.middleware.use(DIMiddleware())
+
+    // MARK: - Configuration
     try DatabaseConfiguration.configure(app)
     try await JWTConfiguration.configure(app)
     MigrationConfiguration.configure(app)
