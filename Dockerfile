@@ -3,11 +3,17 @@
 # ================================
 FROM swift:6.1-noble AS build
 
-# Install OS updates
+# Install OS updates and dependencies
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
-    && apt-get install -y libjemalloc-dev
+    && apt-get install -y \
+      libjemalloc-dev \
+      libssl-dev \
+      libsqlite3-dev \
+      zlib1g-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set up a build area
 WORKDIR /build
@@ -23,30 +29,40 @@ RUN swift package resolve \
 # Copy entire repo into container
 COPY . .
 
-RUN mkdir /staging
+# Create staging directory
+RUN mkdir -p /staging
 
-# Build the application, with optimizations, with static linking, and using jemalloc
-# N.B.: The static version of jemalloc is incompatible with the static Swift runtime.
+# Build the application with verbose output for debugging
 RUN swift build -c release \
         --product AppleAcademyChallenge6 \
         --static-swift-stdlib \
-        -Xlinker -ljemalloc && \
-    # Copy main executable to staging area
-    cp "$(swift build -c release --show-bin-path)/AppleAcademyChallenge6" /staging && \
-    # Copy resources bundled by SPM to staging area
-    find -L "$(swift build -c release --show-bin-path)" -regex '.*\.resources$' -exec cp -Ra {} /staging \;
+        -Xlinker -ljemalloc \
+        -v
 
+# Get the binary path and copy executable
+RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
+    echo "Binary path: $BIN_PATH" && \
+    ls -la "$BIN_PATH" && \
+    cp "$BIN_PATH/AppleAcademyChallenge6" /staging/ && \
+    chmod +x /staging/AppleAcademyChallenge6
+
+# Copy resources bundled by SPM to staging area
+RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
+    find -L "$BIN_PATH" -regex '.*\.resources$' -exec cp -Ra {} /staging \; || true
 
 # Switch to the staging area
 WORKDIR /staging
 
 # Copy static swift backtracer binary to staging area
-RUN cp "/usr/libexec/swift/linux/swift-backtrace-static" ./
+RUN cp "/usr/libexec/swift/linux/swift-backtrace-static" ./ || echo "Warning: swift-backtrace-static not found"
 
 # Copy any resources from the public directory and views directory if the directories exist
 # Ensure that by default, neither the directory nor any of its contents are writable.
 RUN [ -d /build/Public ] && { mv /build/Public ./Public && chmod -R a-w ./Public; } || true
 RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w ./Resources; } || true
+
+# Verify the executable exists
+RUN ls -la /staging && file /staging/AppleAcademyChallenge6
 
 # ================================
 # Run image
@@ -61,11 +77,11 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
       libjemalloc2 \
       ca-certificates \
       tzdata \
-# If your app or its dependencies import FoundationNetworking, also install `libcurl4`.
-      # libcurl4 \
-# If your app or its dependencies import FoundationXML, also install `libxml2`.
-      # libxml2 \
-    && rm -r /var/lib/apt/lists/*
+      libcurl4 \
+      libssl3 \
+      zlib1g \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create a vapor user and group with /app as its home directory
 RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app vapor
