@@ -37,18 +37,19 @@ COPY . .
 RUN mkdir -p /staging
 
 # Build with detailed error output and limited resources
-RUN set -eo pipefail && \
+SHELL ["/bin/bash", "-c"]
+RUN set -e && \
     echo "=== Starting Swift build ===" && \
     echo "=== Available memory ===" && \
     free -h && \
     echo "=== Starting build with limited parallelism ===" && \
-    BUILD_OUTPUT=$(swift build -c release \
+    swift build -c release \
         --product AppleAcademyChallenge6 \
         -j 1 \
         --disable-sandbox \
-        -Xswiftc -diagnostic-style=llvm 2>&1) && \
-    echo "$BUILD_OUTPUT" && \
-    if echo "$BUILD_OUTPUT" | grep -q "error:"; then \
+        -Xswiftc -diagnostic-style=llvm \
+        2>&1 | tee /tmp/build.log && \
+    if grep -q "error:" /tmp/build.log; then \
         echo "=== Build failed with errors ===" && \
         exit 1; \
     fi && \
