@@ -13,7 +13,8 @@ import SotoS3
 
 public func configure(_ app: Application) async throws {
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-    
+
+    CORSConfiguration.configure(app)
     try DatabaseConfiguration.configure(app)
     try await JWTConfiguration.configure(app)
     MigrationConfiguration.configure(app)

@@ -19,6 +19,7 @@ struct OpenAPIConfiguration {
     static func generateOpenAPI(for app: Application) -> OpenAPIObject {
         return app.routes.openAPI(
             info: createInfo(),
+            servers: createServers(environment: app.environment),
             components: createComponents(),
             commonAuth: createCommonAuth(),
             externalDocs: createExternalDocs()
