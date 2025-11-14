@@ -1,45 +1,93 @@
-  name: Deploy to EC2
+name: Deploy to EC2 via Docker Hub
 
-  on:
-    push:
-      branches: [ main ]
-    workflow_dispatch:  # 수동 실행도 가능하게
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # 수동 실행도 가능하게
 
-  jobs:
-    deploy:
-      name: Deploy to EC2
-      runs-on: ubuntu-latest
+jobs:
+  build-and-push:
+    name: Build and Push to Docker Hub
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Deploy to EC2 via SSH
-          uses: appleboy/ssh-action@v1.0.3
-          with:
-            host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USERNAME }}
-            key: ${{ secrets.EC2_SSH_KEY }}
-            port: 22
-            script: |
-              cd ~/AppleAcademyChallenge6_Vapor
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-              echo "📥 Pulling latest code..."
-              git pull origin main
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-              echo "🛑 Stopping existing containers..."
-              docker-compose down
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/appleacademychallenge6
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
 
-              echo "🔨 Building Docker images..."
-              docker-compose build --no-cache
+      - name: Build and push Docker image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/appleacademychallenge6:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/appleacademychallenge6:buildcache,mode=max
+          platforms: linux/amd64
 
-              echo "🚀 Starting services..."
-              docker-compose up -d
+      - name: Image digest
+        run: echo ${{ steps.meta.outputs.digest }}
 
-              echo "📊 Running migrations..."
-              docker-compose run --rm migrate
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
 
-              echo "✅ Deployment completed!"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-              echo "📋 Service status:"
-              docker-compose ps
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/AppleAcademyChallenge6_Vapor
+
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            echo "🔐 Logging in to Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+            echo "🛑 Stopping existing containers..."
+            docker-compose down
+
+            echo "📥 Pulling latest Docker image from Docker Hub..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/appleacademychallenge6:latest
+
+            echo "🚀 Starting services..."
+            docker-compose up -d
+
+            echo "📊 Running migrations..."
+            docker-compose run --rm migrate
+
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+
+            echo "✅ Deployment completed!"
+
+            echo "📋 Service status:"
+            docker-compose ps

@@ -33,9 +33,7 @@ x-shared_environment: &shared_environment
 
 services:
   app:
-    image: appleacademychallenge6-app:latest
-    build:
-      context: .
+    image: ${DOCKERHUB_USERNAME:-euijjang97}/appleacademychallenge6:latest
     environment:
       <<: *shared_environment
     depends_on:
@@ -47,9 +45,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    image: appleacademychallenge6-migrate:latest
-    build:
-      context: .
+    image: ${DOCKERHUB_USERNAME:-euijjang97}/appleacademychallenge6:latest
     environment:
       <<: *shared_environment
     depends_on:
@@ -60,9 +56,7 @@ services:
       replicas: 0
 
   revert:
-    image: appleacademychallenge6-revert:latest
-    build:
-      context: .
+    image: ${DOCKERHUB_USERNAME:-euijjang97}/appleacademychallenge6:latest
     environment:
       <<: *shared_environment
     depends_on:
