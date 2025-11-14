@@ -18,13 +18,14 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
 # Set up a build area
 WORKDIR /build
 
-# Print Swift version for debugging
-RUN swift --version
+# Print environment info for debugging
+RUN echo "=== Environment Info ===" && \
+    swift --version && \
+    uname -a && \
+    free -h && \
+    df -h
 
-# First just resolve dependencies.
-# This creates a cached layer that can be reused
-# as long as your Package.swift/Package.resolved
-# files do not change.
+# First just resolve dependencies
 COPY ./Package.* ./
 RUN swift package resolve \
         $([ -f ./Package.resolved ] && echo "--force-resolved-versions" || true)
@@ -35,10 +36,20 @@ COPY . .
 # Create staging directory
 RUN mkdir -p /staging
 
-# Build the application
+# Build with detailed error output and limited resources
 RUN set -e && \
     echo "=== Starting Swift build ===" && \
-    swift build -c release --product AppleAcademyChallenge6 && \
+    echo "=== Available memory ===" && \
+    free -h && \
+    echo "=== Starting build with limited parallelism ===" && \
+    swift build -c release \
+        --product AppleAcademyChallenge6 \
+        -j 1 \
+        --disable-sandbox \
+        -Xswiftc -diagnostic-style=llvm 2>&1 | tee /tmp/build.log || \
+    (echo "=== Build failed. Last 200 lines of output ===" && \
+     tail -200 /tmp/build.log && \
+     exit 1) && \
     echo "=== Build completed successfully ==="
 
 # Debug: Show the build directory structure
