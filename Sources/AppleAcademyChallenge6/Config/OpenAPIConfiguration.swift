@@ -19,7 +19,6 @@ struct OpenAPIConfiguration {
     static func generateOpenAPI(for app: Application) -> OpenAPIObject {
         return app.routes.openAPI(
             info: createInfo(),
-            servers: createServers(environment: app.environment),
             components: createComponents(),
             commonAuth: createCommonAuth(),
             externalDocs: createExternalDocs()
@@ -52,11 +51,11 @@ struct OpenAPIConfiguration {
         switch environment {
         case .production:
             return [
-                .init(url: EnvironmentValue.serverUrl, description: "Development")
+                .init(url: Environment.get(EnvironmentValue.serverUrl) ?? "http://localhost:8080", description: "Development")
             ]
         case .development:
             return [
-                .init(url: EnvironmentValue.serverUrl, description: "Development")
+                .init(url: Environment.get(EnvironmentValue.serverUrl) ?? "http://localhost:8080", description: "Development")
             ]
         default:
             return [
