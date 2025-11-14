@@ -35,17 +35,32 @@ COPY . .
 # Create staging directory
 RUN mkdir -p /staging
 
-# Build the application with error output
-RUN swift build -c release \
-        --product AppleAcademyChallenge6 \
-        2>&1 | tee /tmp/build.log || (cat /tmp/build.log && exit 1)
+# Build the application
+RUN set -e && \
+    echo "=== Starting Swift build ===" && \
+    swift build -c release --product AppleAcademyChallenge6 && \
+    echo "=== Build completed successfully ==="
+
+# Debug: Show the build directory structure
+RUN echo "=== Build directory structure ===" && \
+    find /build/.build -type d -name "release" 2>/dev/null || echo "No release directory found" && \
+    echo "=== Looking for executable ===" && \
+    find /build/.build -name "AppleAcademyChallenge6" -type f 2>/dev/null || echo "No executable found"
 
 # Get the binary path and copy executable
 RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
-    echo "Binary path: $BIN_PATH" && \
-    ls -la "$BIN_PATH" && \
-    cp "$BIN_PATH/AppleAcademyChallenge6" /staging/ && \
-    chmod +x /staging/AppleAcademyChallenge6
+    echo "Binary path from swift: $BIN_PATH" && \
+    if [ -d "$BIN_PATH" ]; then \
+        ls -la "$BIN_PATH" && \
+        cp "$BIN_PATH/AppleAcademyChallenge6" /staging/ && \
+        chmod +x /staging/AppleAcademyChallenge6; \
+    else \
+        echo "Directory does not exist, searching for executable..." && \
+        EXEC_PATH=$(find /build/.build -name "AppleAcademyChallenge6" -type f | head -n 1) && \
+        echo "Found executable at: $EXEC_PATH" && \
+        cp "$EXEC_PATH" /staging/AppleAcademyChallenge6 && \
+        chmod +x /staging/AppleAcademyChallenge6; \
+    fi
 
 # Copy resources bundled by SPM to staging area
 RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
