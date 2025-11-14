@@ -8,10 +8,10 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
     && apt-get install -y \
-      libjemalloc-dev \
       libssl-dev \
       libsqlite3-dev \
       zlib1g-dev \
+      pkg-config \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,12 +32,9 @@ COPY . .
 # Create staging directory
 RUN mkdir -p /staging
 
-# Build the application with verbose output for debugging
+# Build the application
 RUN swift build -c release \
-        --product AppleAcademyChallenge6 \
-        --static-swift-stdlib \
-        -Xlinker -ljemalloc \
-        -v
+        --product AppleAcademyChallenge6
 
 # Get the binary path and copy executable
 RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
@@ -74,7 +71,6 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
     && apt-get -q install -y \
-      libjemalloc2 \
       ca-certificates \
       tzdata \
       libcurl4 \
