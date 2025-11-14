@@ -1,7 +1,7 @@
 # ================================
 # Build image
 # ================================
-FROM swift:6.1-noble AS build
+FROM swift:6.2-noble AS build
 
 # Install OS updates and dependencies
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -18,6 +18,9 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
 # Set up a build area
 WORKDIR /build
 
+# Print Swift version for debugging
+RUN swift --version
+
 # First just resolve dependencies.
 # This creates a cached layer that can be reused
 # as long as your Package.swift/Package.resolved
@@ -32,9 +35,10 @@ COPY . .
 # Create staging directory
 RUN mkdir -p /staging
 
-# Build the application
+# Build the application with error output
 RUN swift build -c release \
-        --product AppleAcademyChallenge6
+        --product AppleAcademyChallenge6 \
+        2>&1 | tee /tmp/build.log || (cat /tmp/build.log && exit 1)
 
 # Get the binary path and copy executable
 RUN BIN_PATH=$(swift build -c release --show-bin-path) && \
