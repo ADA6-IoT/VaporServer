@@ -10,7 +10,6 @@ import Vapor
 // MARK: - Response
 struct ReportDTO: Content {
     let id: UUID
-    let type: ReportType
     let content: String
     let email: String?
     let status: ReportStatus
@@ -22,7 +21,7 @@ struct ReportDTO: Content {
     let updatedAt: Date?
     
     enum CodingKeys: String, CodingKey {
-        case id, type, content, email, status, images
+        case id, content, email, status, images
         case adminReply = "admin_reply"
         case repliedBy = "replied_by"
         case repliedAt = "replied_at"
@@ -32,7 +31,6 @@ struct ReportDTO: Content {
     
     init(from report: Report) {
         self.id = report.id!
-        self.type = report.type
         self.content = report.content
         self.email = report.email
         self.status = report.status

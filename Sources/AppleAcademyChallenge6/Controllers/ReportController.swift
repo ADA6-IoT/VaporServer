@@ -6,12 +6,50 @@
 //
 
 import Vapor
+import VaporToOpenAPI
 
 struct ReportController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let reports = routes.grouped("api", "reports")
         let protected = reports.grouped(JWTMiddleware())
-        protected.post("inquiry", use: submitInquiry)
+        
+        protected.on(.POST, "inquiry", body: .collect(maxSize: "10mb"), use: submitInquiry)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.report),
+                summary: "문의/신고 접수",
+                description: """
+                 병원 시스템 관련 문의나 신고를 접수합니다.
+                 
+                 **Content-Type:** `multipart/form-data`
+                 
+                 **Form Fields:**
+                 ```
+                 content  : string   (required) - 문의 내용
+                 email    : string   (required) - 이메일 주소
+                 images   : file[]   (optional) - 이미지 파일들
+                 ```
+                 
+                 **cURL 예시:**
+                 ```bash
+                 curl -X POST http://localhost:8080/api/reports/inquiry \\
+                   -H "Authorization: Bearer YOUR_TOKEN" \\
+                   -F "type=INQUIRY" \\
+                   -F "content=문의 내용입니다" \\
+                   -F "email=test@example.com" \\
+                   -F "images=@image1.jpg" \\
+                   -F "images=@image2.jpg"
+                 ```
+                 
+                 **인증 필요:** Bearer Token
+                 """,
+                body: .type(of: InquiryRequest(
+                      content: "문의 내용 예시",
+                      email: "user@example.com",
+                      images: nil
+                  )),
+                contentType: .multipart(.formData),
+                response: .type(CommonResponseDTO<ReportDTO>.self)
+            )
     }
     
     func submitInquiry(_ req: Request) async throws -> CommonResponseDTO<ReportDTO> {
@@ -23,8 +61,9 @@ struct ReportController: RouteCollection {
         
         if let images = content.images {
             for image in images {
+                let data = Data(buffer: image.data)
                 let imageUrl = try await s3Service.uploadImage(
-                    data: image.data,
+                    data: data,
                     filename: image.filename,
                     folder: "Inquiries"
                 )

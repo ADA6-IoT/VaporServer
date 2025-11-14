@@ -7,16 +7,42 @@
 
 import Vapor
 import Fluent
+import VaporToOpenAPI
 
 struct AuthController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("api", "auth")
-        auth.post("register", use: register)
-        auth.post("login", use: login)
-        auth.post("refresh", use: refresh)
         
+        auth.post("register", use: register)
+            .openAPI(tags: TagObject(name: TagObjectValue.auth),
+                     summary: "회원가입",
+                     description: "새로운 병원을 등록합니다.",
+                     body: .type(RegisterRequestDTO.self),
+                     response: .type(CommonResponseDTO<AuthResponseDTO>.self)
+            )
+        auth.post("login", use: login)
+            .openAPI(tags: TagObject(name: TagObjectValue.auth),
+                     summary: "로그인",
+                     description: "병원 계정으로 로그인합니다.",
+                     body: .type(LoginRequestDTO.self),
+                     response: .type(CommonResponseDTO<AuthResponseDTO>.self)
+            )
+        auth.post("refresh", use: refresh)
+            .openAPI(tags: TagObject(name: TagObjectValue.auth),
+                     summary: "Access Token 갱신",
+                     description: "Refresh Token을 사용하여 새로운 Access Token을 발급받는다.",
+                     body: .type(RefreshRequest.self),
+                     response: .type(CommonResponseDTO<TokenResponseDTO>.self)
+            )
         let protected = auth.grouped(JWTMiddleware())
+        
         protected.post("logout", use: logout)
+            .openAPI(tags: TagObject(name: TagObjectValue.auth),
+                     summary: "로그아웃",
+                     description: "로그아웃하여 Refresh Token을 무효화합니다.",
+                     body: .type(LogoutRequest.self),
+                     response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     /// 회원가입
@@ -92,15 +118,6 @@ struct AuthController: RouteCollection {
         /// - 새로운 Access Token (1시간)
         /// - 기존 Refresh Token (연장됨)
     func refresh(_ req: Request) async throws -> CommonResponseDTO<TokenResponseDTO> {
-        
-        struct RefreshRequest: Content {
-            let refreshToken: String
-            
-            enum CodingKeys: String, CodingKey {
-                case refreshToken = "refresh_token"
-            }
-        }
-        
         let dto = try req.content.decode(RefreshRequest.self)
         
         guard !dto.refreshToken.isEmpty else {
@@ -133,15 +150,6 @@ struct AuthController: RouteCollection {
         /// - Refresh Token을 데이터베이스에서 삭제
         /// - Access Token은 클라이언트에서 삭제해야 함
     func logout(_ req: Request) async throws -> CommonResponseDTO<EmptyResponse> {
-        
-        struct LogoutRequest: Content {
-            let refreshToken: String
-            
-            enum CodingKeys: String, CodingKey {
-                case refreshToken = "refresh_token"
-            }
-        }
-        
         let dto = try req.content.decode(LogoutRequest.self)
         let sessionToken = try req.requireAuth()
         let service = req.di.makeAuthService(request: req)

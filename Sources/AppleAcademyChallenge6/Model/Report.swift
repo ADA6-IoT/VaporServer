@@ -17,9 +17,6 @@ final class Report: Model, Content, @unchecked Sendable {
     @Parent(key: "hospital_id")
     var hospital: HospitalAccount
     
-    @Enum(key: "type")
-    var type: ReportType
-    
     @Field(key: "content")
     var content: String
     
@@ -52,14 +49,12 @@ final class Report: Model, Content, @unchecked Sendable {
     init(
         id: UUID? = nil,
         hospitalId: UUID,
-        type: ReportType,
         content: String,
         email: String? = nil,
         status: ReportStatus = .pending
     ) {
         self.id = id
         self.$hospital.id = hospitalId
-        self.type = type
         self.content = content
         self.email = email
         self.status = status

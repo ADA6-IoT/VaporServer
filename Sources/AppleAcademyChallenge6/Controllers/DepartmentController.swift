@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import VaporToOpenAPI
 
 struct DepartmentController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
@@ -13,9 +14,35 @@ struct DepartmentController: RouteCollection {
         let protected = department.grouped(JWTMiddleware())
         
         protected.get("all", use: getAll)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.department),
+                summary: "부서 전체 조회",
+                description: "병원의 모든 부서 목록을 조회",
+                response: .type(CommonResponseDTO<[DepartmentDTO]>.self)
+            )
         protected.post("regist", use: register)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.department),
+                summary: "부서 등록",
+                description: "새로운 부서를 등록합니다.",
+                body: .type(DepartmentAddRequest.self),
+                response: .type(CommonResponseDTO<DepartmentDTO>.self)
+            )
         protected.patch(":id", use: update)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.department),
+                summary: "부서 수정",
+                description: "기존 부서 정보를 수정합니다.",
+                body: .type(DepartmentUpdateRequest.self),
+                response: .type(CommonResponseDTO<DepartmentDTO>.self)
+            )
         protected.delete(":id", use: delete)
+            .openAPI(
+                tags: TagObject(name: TagObjectValue.department),
+                summary: "부서 삭제",
+                description: "부서를 삭제합니다.",
+                response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     func getAll(_ req: Request) async throws -> CommonResponseDTO<[DepartmentDTO]> {
