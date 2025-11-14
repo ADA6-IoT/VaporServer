@@ -89,7 +89,7 @@ final class AuthService {
         }
         
         let accessToken = try await createAccessToken(token.hospital)
-        let expirationSeconds = Environment.get("JWT_EXPIRATION_SECONDS")
+        let expirationSeconds = Environment.get(EnvironmentValue.jwtExpirationSeconds)
             .flatMap(Int.init) ?? 604800
         
         let newExpiresAt = Date().addingTimeInterval(TimeInterval(expirationSeconds))
