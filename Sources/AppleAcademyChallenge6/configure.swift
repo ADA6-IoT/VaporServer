@@ -14,8 +14,8 @@ import SotoS3
 public func configure(_ app: Application) async throws {
     // MARK: - Middleware Configuration
 
-    // 1. 에러 처리 미들웨어 (모든 에러를 캐치하고 적절한 응답 반환)
-    app.middleware.use(ErrorMiddleware.default(environment: app.environment))
+    // 1. 에러 처리 미들웨어 (모든 에러를 캐치하고 CommonResponseDTO 형식으로 응답 반환)
+    app.middleware.use(CustomErrorMiddleware())
 
     // 2. 정적 파일 제공 미들웨어
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
