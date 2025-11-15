@@ -17,4 +17,5 @@ enum SchemaValue {
     static let reports: String = "reports"
     static let reportImages: String = "report_images"
     static let rooms = "rooms"
+    static let errorLogs = "error_logs"
 }

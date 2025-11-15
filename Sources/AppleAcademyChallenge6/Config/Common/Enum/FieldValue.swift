@@ -92,3 +92,14 @@ enum RoomField {
     static let roomType: FieldKey = "room_type"
     static let isAvailable: FieldKey = "is_available"
 }
+
+enum ErrorLogField {
+    static let endpoint: FieldKey = "endpoint"
+    static let method: FieldKey = "method"
+    static let statusCode: FieldKey = "status_code"
+    static let errorMessage: FieldKey = "error_message"
+    static let stackTrace: FieldKey = "stack_trace"
+    static let requestBody: FieldKey = "request_body"
+    static let userAgent: FieldKey = "user_agent"
+    static let ipAddress: FieldKey = "ip_address"
+}
