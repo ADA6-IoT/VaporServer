@@ -20,6 +20,7 @@ final class DeviceService: ServiceProtocol {
         try await Device.query(on: database)
             .filter(\.$hospital.$id == hospitalId)
             .with(\.$hospital)
+            .with(\.$patient)
             .sort(\.$createdAt, .descending)
             .all()
     }
@@ -30,10 +31,12 @@ final class DeviceService: ServiceProtocol {
             .filter(\.$device.$id != nil)
             .all()
             .compactMap { $0.$device.id }
-        
+
         return try await Device.query(on: database)
             .filter(\.$hospital.$id == hospitalId)
             .filter(\.$id !~ useDeviceIds)
+            .with(\.$hospital)
+            .with(\.$patient)
             .all()
     }
     
@@ -56,15 +59,24 @@ final class DeviceService: ServiceProtocol {
             .first() {
             throw Abort(.conflict, reason: "디바이스 이미 존재합니다.")
         }
-        
+
         let device = Device(
             hospitalId: hospitalId,
             serialNumber: serialNumber
         )
-        
+
         try await device.save(on: database)
-        
-        return device
+
+        // Reload with relationships
+        guard let savedDevice = try await Device.query(on: database)
+            .filter(\.$id == device.id!)
+            .with(\.$hospital)
+            .with(\.$patient)
+            .first() else {
+            throw Abort(.internalServerError, reason: "디바이스 저장 후 조회 실패")
+        }
+
+        return savedDevice
     }
     
     // MARK: - 기기 수정
@@ -76,16 +88,18 @@ final class DeviceService: ServiceProtocol {
         guard let device = try await Device.query(on: database)
             .filter(\.$id == id)
             .filter(\.$hospital.$id == hospitalId)
+            .with(\.$hospital)
+            .with(\.$patient)
             .first() else {
             throw Abort(.notFound, reason: "디바이스 찾을 수 없습니다.")
         }
-        
+
         if let serialNumber = serialNumber {
             device.serialNumber = serialNumber
         }
-        
+
         try await device.save(on: database)
-        
+
         return device
     }
     
