@@ -64,6 +64,13 @@ final class LocationService {
         var preciseLocatoin: PreciseLocationDTO?
         if measurements.count >= 3 {
             preciseLocatoin = calculateTrilateration(measurements: measurements, anchors: anchors)
+        } else {
+            // 1-2개일 경우 가장 가까운 앵커의 좌표를 그대로 사용
+            preciseLocatoin = PreciseLocationDTO(
+                x: nearestAnchor.positionX,
+                y: nearestAnchor.positionY,
+                z: nearestAnchor.positionZ
+            )
         }
         
         device.currentZoneType = currentZone.type

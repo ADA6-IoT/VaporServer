@@ -46,7 +46,10 @@ final class AnchorService: ServiceProtocol {
             .first() {
             throw Abort(.conflict, reason: "앵커 맥 주소 이미 존재합니다.")
         }
-        
+
+        // 디버깅: Service에서 받은 position 값 로깅
+        print("🔧 [AnchorService] createAnchor 파라미터 - X: \(positionX), Y: \(positionY), Z: \(positionZ?.description ?? "nil")")
+
         let anchor = Anchor(
             hospitalId: hospitalId,
             macAddress: macAddress,
@@ -57,9 +60,15 @@ final class AnchorService: ServiceProtocol {
             positionY: positionY,
             positionZ: positionZ
         )
-        
+
+        // 디버깅: DB 저장 전 Anchor 객체의 position 값 로깅
+        print("🔧 [AnchorService] DB 저장 전 Anchor 객체 - X: \(anchor.positionX), Y: \(anchor.positionY), Z: \(anchor.positionZ?.description ?? "nil")")
+
         try await anchor.save(on: database)
-        
+
+        // 디버깅: DB 저장 후 Anchor 객체의 position 값 로깅
+        print("🔧 [AnchorService] DB 저장 후 Anchor 객체 - X: \(anchor.positionX), Y: \(anchor.positionY), Z: \(anchor.positionZ?.description ?? "nil")")
+
         return anchor
     }
     
@@ -92,15 +101,19 @@ final class AnchorService: ServiceProtocol {
         if let floor = floor {
             anchor.floor = floor
         }
-        
+
+        if let positionX = positionX {
+            anchor.positionX = positionX
+        }
+
         if let positionY = positionY {
             anchor.positionY = positionY
         }
-        
+
         if let positionZ = positionZ {
             anchor.positionZ = positionZ
         }
-        
+
         try await anchor.save(on: database)
         
         return anchor

@@ -79,7 +79,10 @@ struct AnchorController: RouteCollection {
         let dto = try req.content.decode(AnchorAddRequest.self)
         let sessionToken = try req.requireAuth()
         let service = req.di.makeAnchorService(request: req)
-        
+
+        // 디버깅: 요청으로 들어온 position 값 로깅
+        req.logger.info("📍 [Anchor Create] 요청 받은 좌표 - X: \(dto.positionX), Y: \(dto.positionY), Z: \(dto.positionZ?.description ?? "nil")")
+
         let anchor = try await service.createAnchor(
             hospitalId: sessionToken.hospitalId,
             macAddress: dto.macAddress,
@@ -90,8 +93,12 @@ struct AnchorController: RouteCollection {
             positionY: dto.positionY,
             positionZ: dto.positionZ
         )
-        
+
         let result = AnchorDTO(from: anchor)
+
+        // 디버깅: 응답으로 반환되는 position 값 로깅
+        req.logger.info("📍 [Anchor Create] 반환 좌표 - X: \(result.positionX), Y: \(result.positionY), Z: \(result.positionZ?.description ?? "nil")")
+
         return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "앵커 생성 성공", result: result
         )
     }
