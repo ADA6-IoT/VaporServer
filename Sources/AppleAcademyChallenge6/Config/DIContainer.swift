@@ -70,4 +70,9 @@ struct DIContainer {
     func makeS3Service(request: Request) -> S3Service {
         return S3Service(app: request.application)
     }
+
+    /// DashboardService 생성
+    func makeDashboardService(request: Request) -> DashboardService {
+        return DashboardService(database: request.db)
+    }
 }
