@@ -54,12 +54,16 @@ struct ReportController: RouteCollection {
     
     func submitInquiry(_ req: Request) async throws -> CommonResponseDTO<ReportDTO> {
         let sessionToken = try req.requireAuth()
-        let content = try req.content.decode(InquiryRequest.self)
-        
+
+        // Multipart form data를 직접 파싱
+        let content = try req.content.get(String.self, at: "content")
+        let email = try req.content.get(String.self, at: "email")
+        let images = try? req.content.get([File].self, at: "images")
+
         let s3Service = req.di.makeS3Service(request: req)
         var imageUrls: [String] = []
-        
-        if let images = content.images {
+
+        if let images = images {
             for image in images {
                 let data = Data(buffer: image.data)
                 let imageUrl = try await s3Service.uploadImage(
@@ -70,16 +74,16 @@ struct ReportController: RouteCollection {
                 imageUrls.append(imageUrl)
             }
         }
-        
+
         let reportService = req.di.makeReportService(request: req)
         let report = try await reportService.submitInquiry(
             hospitalId: sessionToken.hospitalId,
-            content: content.content,
-            email: content.email,
+            content: content,
+            email: email,
             images: imageUrls
         )
         try await report.$images.load(on: req.db)
-        
+
         let result = ReportDTO(from: report)
         return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "문의가 성공적으로 접수되었습니다.", result: result)
     }
