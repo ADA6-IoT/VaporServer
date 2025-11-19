@@ -16,7 +16,7 @@ final class Report: Model, Content, @unchecked Sendable {
     
     @Parent(key: "hospital_id")
     var hospital: HospitalAccount
-    
+
     @Field(key: "content")
     var content: String
     

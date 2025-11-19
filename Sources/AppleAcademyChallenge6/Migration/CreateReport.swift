@@ -25,7 +25,6 @@ struct CreateReport: AsyncMigration {
         try await database.schema(SchemaValue.reports)
             .id()
             .field(IdKeyField.hospitalId, .uuid, .required, .references(SchemaValue.hospitalAccount, "id", onDelete: .cascade))
-            .field(ReportField.type, reportTypeEnum, .required)
             .field(ReportField.content, .string, .required)
             .field(ReportField.email, .string)
             .field(ReportField.status, reportStatusEnum, .required)
