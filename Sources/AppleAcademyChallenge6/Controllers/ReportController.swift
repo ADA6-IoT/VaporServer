@@ -53,38 +53,62 @@ struct ReportController: RouteCollection {
     }
     
     func submitInquiry(_ req: Request) async throws -> CommonResponseDTO<ReportDTO> {
-        let sessionToken = try req.requireAuth()
+        do {
+            let sessionToken = try req.requireAuth()
 
-        // Multipart form data를 직접 파싱
-        let content = try req.content.get(String.self, at: "content")
-        let email = try req.content.get(String.self, at: "email")
-        let images = try? req.content.get([File].self, at: "images")
+            // Multipart form data를 직접 파싱
+            req.logger.info("Parsing multipart form data")
 
-        let s3Service = req.di.makeS3Service(request: req)
-        var imageUrls: [String] = []
-
-        if let images = images {
-            for image in images {
-                let data = Data(buffer: image.data)
-                let imageUrl = try await s3Service.uploadImage(
-                    data: data,
-                    filename: image.filename,
-                    folder: "Inquiries"
-                )
-                imageUrls.append(imageUrl)
+            guard let content = try? req.content.get(String.self, at: "content") else {
+                req.logger.error("Failed to get 'content' field")
+                throw Abort(.badRequest, reason: "content 필드가 필요합니다.")
             }
+
+            guard let email = try? req.content.get(String.self, at: "email") else {
+                req.logger.error("Failed to get 'email' field")
+                throw Abort(.badRequest, reason: "email 필드가 필요합니다.")
+            }
+
+            let images = try? req.content.get([File].self, at: "images")
+            req.logger.info("Received content: \(content), email: \(email), images count: \(images?.count ?? 0)")
+
+            let s3Service = req.di.makeS3Service(request: req)
+            var imageUrls: [String] = []
+
+            if let images = images {
+                req.logger.info("Uploading \(images.count) images to S3")
+                for (index, image) in images.enumerated() {
+                    let data = Data(buffer: image.data)
+                    req.logger.info("Uploading image \(index + 1)/\(images.count): \(image.filename)")
+                    let imageUrl = try await s3Service.uploadImage(
+                        data: data,
+                        filename: image.filename,
+                        folder: "Inquiries"
+                    )
+                    imageUrls.append(imageUrl)
+                    req.logger.info("Uploaded image \(index + 1): \(imageUrl)")
+                }
+            }
+
+            req.logger.info("Creating inquiry report")
+            let reportService = req.di.makeReportService(request: req)
+            let report = try await reportService.submitInquiry(
+                hospitalId: sessionToken.hospitalId,
+                content: content,
+                email: email,
+                images: imageUrls
+            )
+            try await report.$images.load(on: req.db)
+
+            let result = ReportDTO(from: report)
+            req.logger.info("Inquiry submitted successfully: \(report.id?.uuidString ?? "unknown")")
+            return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "문의가 성공적으로 접수되었습니다.", result: result)
+        } catch let error as any AbortError {
+            req.logger.error("AbortError in submitInquiry: \(error.reason)")
+            throw error
+        } catch {
+            req.logger.error("Unexpected error in submitInquiry: \(error)")
+            throw Abort(.internalServerError, reason: "문의 접수 중 오류가 발생했습니다: \(error.localizedDescription)")
         }
-
-        let reportService = req.di.makeReportService(request: req)
-        let report = try await reportService.submitInquiry(
-            hospitalId: sessionToken.hospitalId,
-            content: content,
-            email: email,
-            images: imageUrls
-        )
-        try await report.$images.load(on: req.db)
-
-        let result = ReportDTO(from: report)
-        return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "문의가 성공적으로 접수되었습니다.", result: result)
     }
 }

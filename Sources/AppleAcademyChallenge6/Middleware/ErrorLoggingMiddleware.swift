@@ -47,8 +47,20 @@ struct ErrorLoggingMiddleware: AsyncMiddleware {
 
             // 요청 본문 추출 (옵션)
             let requestBody: String?
-            if let bodyBuffer = request.body.data {
-                requestBody = String(buffer: bodyBuffer)
+            let contentType = request.headers.first(name: .contentType) ?? ""
+
+            // 멀티파트 데이터나 바이너리 데이터는 로깅하지 않음
+            if contentType.contains("multipart") {
+                requestBody = "[Multipart Form Data - 생략됨]"
+            } else if let bodyBuffer = request.body.data {
+                let bodySize = bodyBuffer.readableBytes
+                // 10KB 이상의 데이터는 로깅하지 않음
+                if bodySize > 10_240 {
+                    requestBody = "[Request body too large (\(bodySize) bytes) - 생략됨]"
+                } else {
+                    let bodyString = String(buffer: bodyBuffer)
+                    requestBody = bodyString.allSatisfy({ $0.isASCII }) ? bodyString : "[Binary data - 생략됨]"
+                }
             } else {
                 requestBody = nil
             }
