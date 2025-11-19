@@ -53,100 +53,107 @@ struct ReportController: RouteCollection {
     }
     
     func submitInquiry(_ req: Request) async throws -> CommonResponseDTO<ReportDTO> {
-        do {
-            let sessionToken = try req.requireAuth()
-
-            // Multipart form data를 직접 파싱
-            req.logger.info("Parsing multipart form data")
-            req.logger.info("📋 Content-Type: \(req.headers.contentType?.serialize() ?? "unknown")")
-
-            // 모든 content keys 로깅
-            if let contentData = req.body.data {
-                req.logger.info("📦 Body size: \(contentData.readableBytes) bytes")
-            }
-
-            guard let content = try? req.content.get(String.self, at: "content") else {
-                req.logger.error("Failed to get 'content' field")
-                throw Abort(.badRequest, reason: "content 필드가 필요합니다.")
-            }
-
-            guard let email = try? req.content.get(String.self, at: "email") else {
-                req.logger.error("Failed to get 'email' field")
-                throw Abort(.badRequest, reason: "email 필드가 필요합니다.")
-            }
-
-            // 다양한 방법으로 이미지 파싱 시도
-            var images: [File] = []
-
-            // 방법 1: [File] 배열로 시도
-            if let parsedImages = try? req.content.get([File].self, at: "images") {
-                images = parsedImages
-                req.logger.info("✅ Parsed as [File]: \(images.count) images")
-            }
-            // 방법 2: 단일 File로 시도
-            else if let singleImage = try? req.content.get(File.self, at: "images") {
-                images = [singleImage]
-                req.logger.info("✅ Parsed as single File")
-            }
-            // 방법 3: Data로 시도
-            else if let imageData = try? req.content.get(Data.self, at: "images") {
-                let file = File(data: ByteBuffer(data: imageData), filename: "image.jpg")
-                images = [file]
-                req.logger.info("✅ Parsed as Data: \(imageData.count) bytes")
-            }
-            else {
-                req.logger.warning("⚠️ Failed to parse images field")
-
-                // 디버깅: 사용 가능한 모든 필드 출력
-                do {
-                    let allFields = try req.content.decode([String: String].self)
-                    req.logger.info("📝 Available string fields: \(allFields.keys.joined(separator: ", "))")
-                } catch {
-                    req.logger.warning("Could not decode as string dict: \(error)")
-                }
-            }
-
-            req.logger.info("Received content: \(content), email: \(email), images count: \(images.count)")
-
-            let s3Service = req.di.makeS3Service(request: req)
-            var imageUrls: [String] = []
-
-            if !images.isEmpty {
-                req.logger.info("Uploading \(images.count) images to S3")
-                for (index, image) in images.enumerated() {
-                    let data = Data(buffer: image.data)
-                    req.logger.info("Uploading image \(index + 1)/\(images.count): \(image.filename)")
-                    let imageUrl = try await s3Service.uploadImage(
-                        data: data,
-                        filename: image.filename,
-                        folder: "Inquiries"
-                    )
-                    imageUrls.append(imageUrl)
-                    req.logger.info("Uploaded image \(index + 1): \(imageUrl)")
-                }
-            } else {
-                req.logger.info("No images to upload, skipping S3 upload")
-            }
-
-            req.logger.info("Creating inquiry report")
-            let reportService = req.di.makeReportService(request: req)
-            let report = try await reportService.submitInquiry(
-                hospitalId: sessionToken.hospitalId,
-                content: content,
-                email: email,
-                images: imageUrls
-            )
-            try await report.$images.load(on: req.db)
-
-            let result = ReportDTO(from: report)
-            req.logger.info("Inquiry submitted successfully: \(report.id?.uuidString ?? "unknown")")
-            return CommonResponseDTO.success(code: ResponseCode.CREATED201, message: "문의가 성공적으로 접수되었습니다.", result: result)
-        } catch let error as any AbortError {
-            req.logger.error("AbortError in submitInquiry: \(error.reason)")
-            throw error
-        } catch {
-            req.logger.error("Unexpected error in submitInquiry: \(error)")
-            throw Abort(.internalServerError, reason: "문의 접수 중 오류가 발생했습니다: \(error.localizedDescription)")
+        let sessionToken = try req.requireAuth()
+        
+        // 요청 정보 로깅
+        req.logger.info("[Inquiry] Start processing")
+        req.logger.info("[Inquiry] Content-Type: \(req.headers.contentType?.serialize() ?? "unknown")")
+        if let bodySize = req.body.data?.readableBytes {
+            req.logger.info("[Inquiry] Body size: \(bodySize) bytes")
         }
+        
+        // 필수 필드 파싱
+        let content = try parseRequiredField(req, key: "content", fieldName: "content")
+        let email = try parseRequiredField(req, key: "email", fieldName: "email")
+        
+        // 이미지 파싱 (선택)
+        let images = parseImages(from: req)
+        req.logger.info("[Inquiry] Parsed - content: '\(content)', email: '\(email)', images: \(images.count)")
+        
+        // S3 업로드
+        let imageUrls = try await uploadImages(images, to: req)
+        
+        // 데이터베이스 저장
+        let reportService = req.di.makeReportService(request: req)
+        let report = try await reportService.submitInquiry(
+            hospitalId: sessionToken.hospitalId,
+            content: content,
+            email: email,
+            images: imageUrls
+        )
+        try await report.$images.load(on: req.db)
+        
+        req.logger.info("[Inquiry] Success - Report ID: \(report.id?.uuidString ?? "unknown")")
+        
+        let result = ReportDTO(from: report)
+        return CommonResponseDTO.success(
+            code: ResponseCode.CREATED201,
+            message: "문의가 성공적으로 접수되었습니다.",
+            result: result
+        )
     }
+
+    
+    private func parseRequiredField(_ req: Request, key: String, fieldName: String) throws -> String {
+          do {
+              return try req.content.get(String.self, at: key)
+          } catch {
+              req.logger.error("[Inquiry] Failed to parse '\(fieldName)': \(error)")
+              throw Abort(.badRequest, reason: "\(fieldName) 필드가 필요합니다.")
+          }
+      }
+
+      private func parseImages(from req: Request) -> [File] {
+          // 방법 1: [File] 배열로 시도
+          if let parsedImages = try? req.content.get([File].self, at: "images") {
+              req.logger.info("[Inquiry] Parsed images as [File] array: \(parsedImages.count) files")
+              return parsedImages
+          }
+
+          // 방법 2: 단일 File로 시도
+          if let singleImage = try? req.content.get(File.self, at: "images") {
+              req.logger.info("[Inquiry] Parsed images as single File")
+              return [singleImage]
+          }
+
+          // 방법 3: Data로 시도
+          if let imageData = try? req.content.get(Data.self, at: "images") {
+              req.logger.info("[Inquiry] Parsed images as Data: \(imageData.count) bytes")
+              return [File(data: ByteBuffer(data: imageData), filename: "image.jpg")]
+          }
+
+          // 파싱 실패 - 디버깅 정보 출력
+          req.logger.warning("[Inquiry] Failed to parse images field")
+          if let allFields = try? req.content.decode([String: String].self) {
+              req.logger.info("[Inquiry] Available string fields: \(allFields.keys.joined(separator: ", "))")
+          }
+
+          return []
+      }
+
+      private func uploadImages(_ images: [File], to req: Request) async throws -> [String] {
+          guard !images.isEmpty else {
+              req.logger.info("[Inquiry] No images to upload")
+              return []
+          }
+
+          req.logger.info("[Inquiry] Uploading \(images.count) image(s) to S3")
+          let s3Service = req.di.makeS3Service(request: req)
+          var imageUrls: [String] = []
+
+          for (index, image) in images.enumerated() {
+              let data = Data(buffer: image.data)
+              req.logger.info("[Inquiry] Uploading [\(index + 1)/\(images.count)]: \(image.filename) (\(data.count) bytes)")
+
+              let imageUrl = try await s3Service.uploadImage(
+                  data: data,
+                  filename: image.filename,
+                  folder: "Inquiries"
+              )
+              imageUrls.append(imageUrl)
+              req.logger.info("[Inquiry] Uploaded [\(index + 1)]: \(imageUrl)")
+          }
+
+          return imageUrls
+      }
 }
