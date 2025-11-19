@@ -34,7 +34,6 @@ final class S3Service: Sendable {
         
         let buffer = ByteBuffer(data: data)
         let putRequest = S3.PutObjectRequest(
-            acl: .publicRead,
             body: .init(buffer: buffer),
             bucket: bucket,
             contentType: contentType(for: fileExtension),

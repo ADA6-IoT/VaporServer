@@ -58,6 +58,12 @@ struct ReportController: RouteCollection {
 
             // Multipart form data를 직접 파싱
             req.logger.info("Parsing multipart form data")
+            req.logger.info("📋 Content-Type: \(req.headers.contentType?.serialize() ?? "unknown")")
+
+            // 모든 content keys 로깅
+            if let contentData = req.body.data {
+                req.logger.info("📦 Body size: \(contentData.readableBytes) bytes")
+            }
 
             guard let content = try? req.content.get(String.self, at: "content") else {
                 req.logger.error("Failed to get 'content' field")
@@ -69,8 +75,38 @@ struct ReportController: RouteCollection {
                 throw Abort(.badRequest, reason: "email 필드가 필요합니다.")
             }
 
-            let images = try? req.content.get([File].self, at: "images")
-            req.logger.info("Received content: \(content), email: \(email), images count: \(images?.count ?? 0)")
+            // 다양한 방법으로 이미지 파싱 시도
+            var images: [File] = []
+
+            // 방법 1: [File] 배열로 시도
+            if let parsedImages = try? req.content.get([File].self, at: "images") {
+                images = parsedImages
+                req.logger.info("✅ Parsed as [File]: \(images.count) images")
+            }
+            // 방법 2: 단일 File로 시도
+            else if let singleImage = try? req.content.get(File.self, at: "images") {
+                images = [singleImage]
+                req.logger.info("✅ Parsed as single File")
+            }
+            // 방법 3: Data로 시도
+            else if let imageData = try? req.content.get(Data.self, at: "images") {
+                let file = File(data: ByteBuffer(data: imageData), filename: "image.jpg")
+                images = [file]
+                req.logger.info("✅ Parsed as Data: \(imageData.count) bytes")
+            }
+            else {
+                req.logger.warning("⚠️ Failed to parse images field")
+
+                // 디버깅: 사용 가능한 모든 필드 출력
+                do {
+                    let allFields = try req.content.decode([String: String].self)
+                    req.logger.info("📝 Available string fields: \(allFields.keys.joined(separator: ", "))")
+                } catch {
+                    req.logger.warning("Could not decode as string dict: \(error)")
+                }
+            }
+
+            req.logger.info("Received content: \(content), email: \(email), images count: \(images.count)")
 
             let s3Service = req.di.makeS3Service(request: req)
             var imageUrls: [String] = []

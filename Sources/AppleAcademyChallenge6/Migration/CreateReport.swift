@@ -9,12 +9,6 @@ import Fluent
 
 struct CreateReport: AsyncMigration {
     func prepare(on database: any Database) async throws {
-        
-        let reportTypeEnum = try await database.enum("report_type")
-            .case("inquiry")
-            .case("bug")
-            .create()
-        
         let reportStatusEnum = try await database.enum("report_status")
             .case("pending")
             .case("in_progress")

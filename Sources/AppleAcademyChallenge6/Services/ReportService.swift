@@ -24,8 +24,15 @@ final class ReportService: ServiceProtocol {
         images: [String]
     ) async throws -> Report {
         let report = Report(hospitalId: hospitalId, content: content, email: email, status: .pending)
-        
-        try await report.save(on: database)
+
+        print("🔍 DEBUG: Attempting to save report to database...")
+        do {
+            try await report.save(on: database)
+            print("✅ DEBUG: Report saved successfully")
+        } catch {
+            print("❌ DEBUG: Failed to save report: \(String(reflecting: error))")
+            throw error
+        }
         
         guard let reportId = report.id else {
             throw Abort(.internalServerError, reason: "Report ID 생성 실패")
