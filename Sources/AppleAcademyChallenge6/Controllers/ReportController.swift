@@ -111,7 +111,7 @@ struct ReportController: RouteCollection {
             let s3Service = req.di.makeS3Service(request: req)
             var imageUrls: [String] = []
 
-            if let images = images {
+            if !images.isEmpty {
                 req.logger.info("Uploading \(images.count) images to S3")
                 for (index, image) in images.enumerated() {
                     let data = Data(buffer: image.data)
@@ -124,6 +124,8 @@ struct ReportController: RouteCollection {
                     imageUrls.append(imageUrl)
                     req.logger.info("Uploaded image \(index + 1): \(imageUrl)")
                 }
+            } else {
+                req.logger.info("No images to upload, skipping S3 upload")
             }
 
             req.logger.info("Creating inquiry report")
