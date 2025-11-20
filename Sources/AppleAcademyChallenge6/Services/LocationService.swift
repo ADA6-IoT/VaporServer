@@ -59,13 +59,17 @@ final class LocationService {
             throw Abort(.badRequest, reason: "측정된 앵커를 찾을 수 없습니다.")
         }
         
-        let currentZone = CurrentZoneResponseDTO(type: nearestAnchor.zoneType, name: nearestAnchor.zoneName, floor: nearestAnchor.floor)
+        let floorDisplay = nearestAnchor.floor < 0 ? "지하 \(abs(nearestAnchor.floor)) 층" : "\(nearestAnchor.floor)층"
+        let currentZone = CurrentZoneResponseDTO(
+            type: nearestAnchor.zoneType,
+            name: nearestAnchor.zoneName,
+            floor: nearestAnchor.floor
+        )
         
         var preciseLocatoin: PreciseLocationDTO?
         if measurements.count >= 3 {
             preciseLocatoin = calculateTrilateration(measurements: measurements, anchors: anchors)
         } else {
-            // 1-2개일 경우 가장 가까운 앵커의 좌표를 그대로 사용
             preciseLocatoin = PreciseLocationDTO(
                 x: nearestAnchor.positionX,
                 y: nearestAnchor.positionY,
