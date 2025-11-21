@@ -59,11 +59,10 @@ final class LocationService {
             throw Abort(.badRequest, reason: "측정된 앵커를 찾을 수 없습니다.")
         }
         
-        let floorDisplay = nearestAnchor.floor < 0 ? "지하 \(abs(nearestAnchor.floor)) 층" : "\(nearestAnchor.floor)층"
         let currentZone = CurrentZoneResponseDTO(
             type: nearestAnchor.zoneType,
             name: nearestAnchor.zoneName,
-            floor: Int(floorDisplay) ?? 0
+            floor: nearestAnchor.floor
         )
         
         var preciseLocatoin: PreciseLocationDTO?
