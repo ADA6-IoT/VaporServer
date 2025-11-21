@@ -124,6 +124,24 @@ final class AuthService {
         
         return hospital
     }
+    
+    // MARK: - 회원탈퇴
+    func deleteAccount(hospitalId: UUID, password: String) async throws {
+        guard let hospital = try await HospitalAccount.find(hospitalId, on: database) else {
+            throw Abort(.notFound, reason: "병원 계정을 찾을 수 없습니다.")
+        }
+        
+        let isAalidPassword = try hospital.verify(password: password)
+        guard isAalidPassword else {
+            throw Abort(.unauthorized, reason: "비밀번호가 일치하지 않습니다.")
+        }
+        
+        try await RefreshToken.query(on: database)
+            .filter(\.$hospital.$id == hospitalId)
+            .delete()
+        
+        try await hospital.delete(on: database)
+    }
 }
 
 extension AuthService {

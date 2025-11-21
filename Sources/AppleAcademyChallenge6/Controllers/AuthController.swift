@@ -43,6 +43,14 @@ struct AuthController: RouteCollection {
                      body: .type(LogoutRequest.self),
                      response: .type(CommonResponseDTO<EmptyResponse>.self)
             )
+        
+        protected.delete("withdraw", use: withdraw)
+            .openAPI(tags: TagObject(name: TagObjectValue.auth),
+                     summary: "회원 탈퇴",
+                     description: "비밀번호 확인 후 계정을 삭제합니다.",
+                     body: .type(WithdrawRequest.self),
+                     response: .type(CommonResponseDTO<EmptyResponse>.self)
+            )
     }
     
     /// 회원가입
@@ -157,5 +165,14 @@ struct AuthController: RouteCollection {
         try await service.logout(refreshToken: dto.refreshToken, hospitalId: sessionToken.hospitalId)
         
         return CommonResponseDTO.successNoData(code: ResponseCode.COMMON200, message: "로그아웃 성공")
+    }
+    
+    func withdraw(_ req: Request) async throws -> CommonResponseDTO<EmptyResponse> {
+        let dto = try req.content.decode(WithdrawRequest.self)
+        let session = try req.requireAuth()
+        let service = req.di.makeAuthService(request: req)
+        
+        try await service.deleteAccount(hospitalId: session.hospitalId, password: dto.password)
+        return CommonResponseDTO.successNoData(code: ResponseCode.COMMON200, message: "회원탈퇴 성공")
     }
 }

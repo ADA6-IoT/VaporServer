@@ -63,7 +63,7 @@ final class LocationService {
         let currentZone = CurrentZoneResponseDTO(
             type: nearestAnchor.zoneType,
             name: nearestAnchor.zoneName,
-            floor: nearestAnchor.floor
+            floor: Int(floorDisplay) ?? 0
         )
         
         var preciseLocatoin: PreciseLocationDTO?
