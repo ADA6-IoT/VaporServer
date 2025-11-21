@@ -49,7 +49,8 @@ struct AuthController: RouteCollection {
                      summary: "회원 탈퇴",
                      description: "비밀번호 확인 후 계정을 삭제합니다.",
                      body: .type(WithdrawRequest.self),
-                     response: .type(CommonResponseDTO<EmptyResponse>.self)
+                     response: .type(CommonResponseDTO<EmptyResponse
+                                     >.self)
             )
     }
     

@@ -133,7 +133,7 @@ final class AuthService {
         
         let isAalidPassword = try hospital.verify(password: password)
         guard isAalidPassword else {
-            throw Abort(.unauthorized, reason: "비밀번호가 일치하지 않습니다.")
+            throw Abort(.badRequest, reason: "비밀번호가 일치하지 않습니다.")
         }
         
         try await RefreshToken.query(on: database)
